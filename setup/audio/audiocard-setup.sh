@@ -19,11 +19,8 @@
 # firstly disable PWM audio
 sudo bash -c "sed -i \"s/^\s*dtparam=audio/#dtparam=audio/\" /boot/firmware/config.txt"
 
-# add alsa restore to rc.local
-sudo patch -b -N -u /etc/rc.local -i setup/audio/rclocal.diff
-
 # append lines to config.txt
-cnt=$(grep -c "dtoverlay=audioinjector-wm8731-audio" /boot/config.txt)
+cnt=$(grep -c "dtoverlay=audioinjector-wm8731-audio" /boot/firmware/config.txt)
 if [[ "$cnt" -eq "0" ]]; then
 sudo bash -c "cat >> /boot/firmware/config.txt <<EOF
 
@@ -33,4 +30,3 @@ dtoverlay=iqaudio-codec
 #dtoverlay=hifiberry-dacplusadc
 EOF"
 fi
-

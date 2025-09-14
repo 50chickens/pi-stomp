@@ -1,0 +1,10 @@
+[Unit]
+Description=Pi Stomp service
+
+[Service]
+ExecStart=/bin/bash /opt/pistomp/scripts/pistomp.sh
+Restart=always
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

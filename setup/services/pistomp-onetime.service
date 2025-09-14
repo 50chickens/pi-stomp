@@ -1,0 +1,9 @@
+[Unit]
+Description=Pi Stomp One Time startup
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /opt/pistomp/scripts/pistomp-onetime.sh
+
+[Install]
+WantedBy=multi-user.target

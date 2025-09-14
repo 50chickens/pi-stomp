@@ -15,20 +15,12 @@
 # You should have received a copy of the GNU General Public License
 # along with pi-stomp.  If not, see <https://www.gnu.org/licenses/>.
 
-sudo cp setup/services/*.service /usr/lib/systemd/system/
-sudo ln -sf /usr/lib/systemd/system/mod-ala-pi-stomp.service /etc/systemd/system/multi-user.target.wants
-
-if [ x"$has_ttymidi" == x"true" ]; then
-    echo "Enabling ttymidi service"
-    sudo ln -sf /usr/lib/systemd/system/ttymidi.service /etc/systemd/system/multi-user.target.wants
-fi
-
 # Copy WiFi hotspot files
 sudo cp setup/services/hotspot/etc/default/hostapd.pistomp /etc/default
 sudo cp setup/services/hotspot/etc/dnsmasq.d/wifi-hotspot.conf /etc/dnsmasq.d
 sudo cp setup/services/hotspot/etc/hostapd/hostapd.conf /etc/hostapd
 sudo cp -R setup/services/hotspot/usr/lib/pistomp-wifi /usr/lib
-sudo cp setup/services/hotspot/usr/lib/systemd/system/wifi-hotspot.service /usr/lib/systemd/system
+#sudo cp setup/services/hotspot/usr/lib/systemd/system/wifi-hotspot.service /usr/lib/systemd/system
 sudo chown -R pistomp:pistomp /usr/lib/pistomp-wifi
 sudo chmod +x -R /usr/lib/pistomp-wifi
 
@@ -40,3 +32,14 @@ sudo cp setup/services/wifi_check.sh /etc/wpa_supplicant/
 
 # Copy wlan0.conf to prevent wifi power save mode
 #sudo cp setup/services/wlan0.conf /etc/network/interfaces.d/
+
+mkdir -p /opt/pistomp/scripts/
+
+sudo cp setup/services/*.service /usr/lib/systemd/system
+sudo cp setup/services/scripts/*.sh /opt/pistomp/scripts/
+systemctl daemon-reload
+
+if [ x"$has_ttymidi" != x"true" ]; then
+    echo "Enabling ttymidi service"
+    systemctl disable ttymidi.service
+fi

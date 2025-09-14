@@ -34,7 +34,7 @@ usage()
     echo " -h                    Display this message"    
 }
 
-hardware_version=3.0
+hardware_version=2.0
 has_ttymidi=false
 plugins=true
 
@@ -68,6 +68,8 @@ export has_ttymidi
 #This is not necessary any more as we run it before we git clone
 #printf "\n===== OS update =====\n"
 #sudo apt-get update -y --allow-releaseinfo-change --fix-missing
+printf "\n===== RT Kernel Install =====\n"
+setup/sys/rtkernel.sh
 
 printf "\n===== Audio card setup =====\n"
 setup/audio/audiocard-setup.sh
@@ -112,9 +114,6 @@ cp setup/sys/bash_aliases ~/.bash_aliases
 
 printf "\n===== Manage services =====\n"
 setup/services/create_services.sh
-
-printf "\n===== RT Kernel Install =====\n"
-setup/sys/rtkernel.sh
 
 printf "\n===== pi-stomp setup complete - rebooting =====\n"
 sudo reboot now
