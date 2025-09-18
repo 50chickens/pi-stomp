@@ -21,7 +21,7 @@ set -e
 # sudo dpkg -i setup/sys/linux-headers-6.1.54-rt15-v8+_6.1.54-rt15-v8+-2_arm64.deb
 # sudo dpkg -i setup/sys/linux-libc-dev_6.1.54-rt15-v8+-2_arm64.deb
 # sudo dpkg -i setup/sys/linux-image-6.1.54-rt15-v8+_6.1.54-rt15-v8+-2_arm64.deb
-apt install linux-headers-rt-arm64 linux-libc-dev-rt-arm64 linux-image-rt-arm64
+sudo apt -y install linux-headers-rt-arm64 linux-libc-dev linux-image-rt-arm64
 
 KERN2=6.1.54-rt15-v8+
 sudo mkdir -p /boot/firmware/$KERN2/o/

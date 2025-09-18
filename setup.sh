@@ -65,11 +65,15 @@ done
 
 export has_ttymidi
 
-#This is not necessary any more as we run it before we git clone
-#printf "\n===== OS update =====\n"
-#sudo apt-get update -y --allow-releaseinfo-change --fix-missing
+printf "\n===== OS update =====\n"
+sudo apt-get update -y --allow-releaseinfo-change --fix-missing
+sudo apt-get upgrade -y
+sudo apt-get dist-upgrade -y
+sudo apt-get autoremove -y
+sudo apt-get autoclean -y
+sudo rpi-update
 printf "\n===== RT Kernel Install =====\n"
-setup/sys/rtkernel.sh
+sudo setup/sys/rtkernel.sh
 
 printf "\n===== Audio card setup =====\n"
 setup/audio/audiocard-setup.sh
