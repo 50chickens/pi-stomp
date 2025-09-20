@@ -37,7 +37,12 @@ default_hwfile="$template_dir/default-hardware-descriptor.json"
 mkdir -p $config_dir
 
 cp $default_hwfile $hwfile
+if [ -e $pb_dir ]; then
+    rm -rf $pb_dir
+fi 
+mkdir -p $pb_dir
 
+git clone https://github.com/TreeFallSound/pi-stomp-pedalboards.git $pb_dir
 if awk "BEGIN {exit !($1 >= 3.0 )}"; then
     cp $pistomp_tre_config_file $config_file
     sudo sed -i 's/-p [0-9]\+/-p 128/' $jackdrc_file
@@ -47,7 +52,12 @@ if awk "BEGIN {exit !($1 >= 3.0 )}"; then
     fi
 elif awk "BEGIN {exit !($1 >= 2.0 )}"; then
     cp $pistomp_core_config_file $config_file
+    echo "$pistomp_core_config_file"
+    echo "$config_file"
     sudo sed -i 's/-p [0-9]\+/-p 256/' $jackdrc_file
+    echo "$jackdrc_file"
+    echo "Setting pedalboards to v2"
+    echo "$pb_dir"
     if ! git -C "$pb_dir" checkout v2; then
       echo "Git checkout failed"
       exit 1
