@@ -5,5 +5,3 @@ get-childitem -path ~/pi-stomp/setup/includes/*.ps1 |% {
 
 Disable-BuiltInAudio
 Enable-AudioOverlay
-
- 

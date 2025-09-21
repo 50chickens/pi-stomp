@@ -59,8 +59,8 @@ function Test-ICanSudo()
 
 function Invoke-PackageInstall()
 {
-    
     sudo apt-get -y install virtualenv python3-pip python3-dev python3-zeroconf build-essential libasound2-dev libjack-jackd2-dev liblilv-dev libjpeg-dev zlib1g-dev cmake debhelper dh-autoreconf dh-python gperf intltool ladspa-sdk libarmadillo-dev libavahi-gobject-dev libavcodec-dev libavutil-dev libbluetooth-dev libboost-dev libeigen3-dev libfftw3-dev libglib2.0-dev libglibmm-2.4-dev libgtk2.0-dev libgtkmm-2.4-dev liblrdf0-dev libsamplerate0-dev libsigc++-2.0-dev libsndfile1-dev libzita-convolver-dev libzita-resampler-dev lv2-dev p7zip-full python3-all python3-setuptools libreadline-dev zita-alsa-pcmi-utils hostapd dnsmasq iptables python3-smbus liblo-dev python3-liblo libzita-alsa-pcmi-dev authbind rcconf libfluidsynth-dev lockfile-progs
+    sudo apt-get -y install liblilv-dev lv2-dev libserd-dev libsord-dev libsratom-dev lilv-utils liblilv-0-0
 }
 function New-Folders($foldersToCreate, $baseFolder, [switch] $sudo)
 { 
@@ -94,4 +94,20 @@ function New-Folders($foldersToCreate, $baseFolder, [switch] $sudo)
             Write-Host "Folder already exists: $folder"
         }
     }
+}
+
+function New-lv2pluginsfolder()
+{
+    if (Test-Path -Path "~/.lv2")
+    {
+        Write-Host "~/.lv2 folder already exists"
+        remove-item -Recurse -Force ~/.lv2
+    }
+    if (Test-Path -Path "~/data/.lv2")
+    {
+        Write-Host "~/data/.lv2 folder already exists .Removing"
+        remove-item -force ~/data/.lv2 #remove item won't remove symlinks where the target is missing.
+    }
+    Write-Host "linking ~/data/.lv2 folder to ~/.lv2"
+    ln -s ~/.lv2 ~/data/.lv2
 }

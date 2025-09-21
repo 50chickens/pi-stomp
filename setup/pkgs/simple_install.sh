@@ -16,36 +16,36 @@
 # along with pi-stomp.  If not, see <https://www.gnu.org/licenses/>.
 
 # pip3
-if (which pip3 > /dev/null); then true; else
-  sudo apt-get install --fix-broken --fix-missing -y
-  sudo apt-get install -y python3-pip
-fi
+# if (which pip3 > /dev/null); then true; else
+#   sudo apt-get install --fix-broken --fix-missing -y
+#   sudo apt-get install -y python3-pip
+# fi
 
-# Pyyml
-sudo /usr/bin/pip3 install pyyaml
+# # Pyyml
+# sudo /usr/bin/pip3 install pyyaml
 
-# For diagnostic test mode
-sudo /usr/bin/pip3 install pyalsaaudio
+# # For diagnostic test mode
+# sudo /usr/bin/pip3 install pyalsaaudio
 
-# Midi
-sudo /usr/bin/pip3 install python-rtmidi
+# # Midi
+# sudo /usr/bin/pip3 install python-rtmidi
 
-# Requests
-sudo /usr/bin/pip3 install requests
+# # Requests
+# sudo /usr/bin/pip3 install requests
 
-# GPIO
-sudo /usr/bin/pip3 install RPi.GPIO
+# # GPIO
+# sudo /usr/bin/pip3 install RPi.GPIO
 
-#GFXHat
-sudo /usr/bin/pip3 install gfxhat
+# #GFXHat
+# sudo /usr/bin/pip3 install gfxhat
 
-# LEDstring
-sudo /usr/bin/pip3 install matplotlib rpi_ws281x adafruit-circuitpython-neopixel
+# # LEDstring
+# sudo /usr/bin/pip3 install matplotlib rpi_ws281x adafruit-circuitpython-neopixel
 
-# LCD
-sudo /usr/bin/pip3 install adafruit-circuitpython-rgb-display
-sudo apt install -y python3-numpy
+# # LCD
+# sudo /usr/bin/pip3 install adafruit-circuitpython-rgb-display
+# sudo apt install -y python3-numpy
 
-# MCP3xxx (ADC support)
-pushd $(mktemp -d) && curl https://files.pythonhosted.org/packages/57/3a/2d62e66b60619d6f15a2ebf08ad77fcc4196c924e489ec22b66e1977d88b/adafruit-circuitpython-mcp3xxx-1.4.1.tar.gz > mcp.tgz
-sudo /usr/bin/pip3 install mcp.tgz
+# # MCP3xxx (ADC support)
+# pushd $(mktemp -d) && curl https://files.pythonhosted.org/packages/57/3a/2d62e66b60619d6f15a2ebf08ad77fcc4196c924e489ec22b66e1977d88b/adafruit-circuitpython-mcp3xxx-1.4.1.tar.gz > mcp.tgz
+# sudo /usr/bin/pip3 install mcp.tgz

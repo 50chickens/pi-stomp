@@ -15,140 +15,83 @@
 # You should have received a copy of the GNU General Public License
 # along with pi-stomp.  If not, see <https://www.gnu.org/licenses/>.
 
-#set -x
-
-#Install Dependancies
-
-
-#Install Python Dependencies
-
-#apt-get install python3-serial python3-pystache python3-aggdraw python3-scandir python3-whichcraft python3-pycrypto python3-tornado python3-pillow python3-cython
-# python -m venv ~/.env
-# source ~/.env/bin/activate
-
-# pip3 install pyserial==3.0 pystache==0.5.4 aggdraw==1.3.11 scandir backports.shutil-get-terminal-size
-# pip3 install pycrypto
-# pip3 install tornado==4.3
-# pip3 install Pillow==8.4.0
-# pip3 install cython
-
-#Install Mod Software
-# mkdir -p /home/pistomp/data/.pedalboards
-# mkdir -p /home/pistomp/data/user-files
-# sudo mkdir -p /usr/mod/scripts
-# cd /home/pistomp/data/user-files
-# mkdir -p "Speaker Cabinets IRs"
-# mkdir -p "Reverb IRs"
-# mkdir -p "Audio Loops"
-# mkdir -p "Audio Recordings"
-# mkdir -p "Audio Samples"
-# mkdir -p "Audio Tracks"
-# mkdir -p "MIDI Clips"
-# mkdir -p "MIDI Songs"
-# mkdir -p "Hydrogen Drumkits"
-# mkdir -p "SF2 Instruments"
-# mkdir -p "SFZ Instruments"
-# mkdir -p "Amplifier Profiles"
-# mkdir -p "Aida DSP Models"
-# mkdir -p "NAM Models"
-
+function Invoke-CompileJack()
+{
+    pushd $(mktemp -d) && git clone https://github.com/micahvdm/jack2.git
+    pushd jack2
+    ./waf configure
+    ./waf build
+    sudo ./waf install
+    popd
+    popd
+}
 function Invoke-ModSetup()
 {
+# #Mod-host
+    pushd $(mktemp -d) && git clone https://github.com/micahvdm/mod-host.git
+    pushd mod-host
+    make
+    sudo make install
+    popd
+    popd
+}
+
+function Invoke-ModUI()
+{
+
+    pushd $(mktemp -d) && git clone https://github.com/micahvdm/mod-ui.git
+    pushd mod-ui
+    chmod +x setup.py
+    cd utils
+    make
+    cd ..
+    sudo ./setup.py install
+    cp -r default.pedalboard /home/pistomp/data/.pedalboards
+    popd
+    popd
+}
+
+function New-PedalboardDefaultFiles()
+{
+    if (Test-Path -Path "~/.pedalboards" -PathType Leaf)
+    {
+        rm -rf ~/.pedalboards
+    }
+    ln -s ~/data/.pedalboards ~/.pedalboards
+    
+}
+
+function Invoke-InstallMod()
+{
+    Invoke-CompileJack
+    Invoke-ModSetup
+    Invoke-ModUI
+    New-ModSystemDServices
+    Invoke-JackConfiguration
+    New-PedalboardDefaultFiles
+}
+function New-ModSystemDServices()
+{
+    sudo cp setup/mod/*.service /usr/lib/systemd/system/
+    sudo ln -sf /usr/lib/systemd/system/browsepy.service /etc/systemd/system/multi-user.target.wants
+    sudo ln -sf /usr/lib/systemd/system/jack.service /etc/systemd/system/multi-user.target.wants
+    sudo ln -sf /usr/lib/systemd/system/mod-host.service /etc/systemd/system/multi-user.target.wants
+    sudo ln -sf /usr/lib/systemd/system/mod-ui.service /etc/systemd/system/multi-user.target.wants
 
 }
 
-
-
-
-
-# mkdir -p "Speaker Cabinets IRs"
-# mkdir -p "Reverb IRs"
-# mkdir -p "Audio Loops"
-# mkdir -p "Audio Recordings"
-# mkdir -p "Audio Samples"
-# mkdir -p "Audio Tracks"
-# mkdir -p "MIDI Clips"
-# mkdir -p "MIDI Songs"
-# mkdir -p "Hydrogen Drumkits"
-# mkdir -p "SF2 Instruments"
-# mkdir -p "SFZ Instruments"
-# mkdir -p "Amplifier Profiles"
-# mkdir -p "Aida DSP Models"
-# mkdir -p "NAM Models"
-
-
-
-# #Jack2
-# pushd $(mktemp -d) && git clone https://github.com/moddevices/jack2.git
-# pushd jack2
-# ./waf configure
-# ./waf build
-# sudo ./waf install
-
-# #Browsepy
-# pushd $(mktemp -d) && git clone https://github.com/micahvdm/browsepy.git
-# pushd browsepy
-# sudo pip3 install ./
-
-# #Mod-host
-# pushd $(mktemp -d) && git clone https://github.com/moddevices/mod-host.git
-# pushd mod-host
-# make
-# sudo make install
-
-# #Mod-ui
-# pushd $(mktemp -d) && git clone https://github.com/micahvdm/mod-ui.git
-# pushd mod-ui
-# chmod +x setup.py
-# cd utils
-# make
-# cd ..
-# sudo ./setup.py install
-# cp -r default.pedalboard /home/pistomp/data/.pedalboards
-
-# #Touchosc2midi
-# pushd $(mktemp -d) && git clone https://github.com/BlokasLabs/amidithru.git
-# pushd amidithru
-# sed -i 's/CXX=g++.*/CXX=g++/' Makefile
-# sudo make install
-
-# pushd $(mktemp -d) && git clone https://github.com/micahvdm/touchosc2midi.git
-# pushd touchosc2midi
-# sudo pip3 install ./
-
-# pushd $(mktemp -d) && git clone https://github.com/micahvdm/mod-midi-merger.git
-# pushd mod-midi-merger
-# mkdir build && cd build
-# cmake ..
-# make
-# sudo make install
-
-# cd /home/pistomp
-
-# ln -s /home/pistomp/data/.pedalboards /home/pistomp/.pedalboards
-# ln -s /home/pistomp/.lv2 /home/pistomp/data/.lv2
-
-# cd /home/pistomp/pi-stomp/setup/mod
-
-# #Create Services
-# sudo cp *.service /usr/lib/systemd/system/
-# sudo ln -sf /usr/lib/systemd/system/browsepy.service /etc/systemd/system/multi-user.target.wants
-# sudo ln -sf /usr/lib/systemd/system/jack.service /etc/systemd/system/multi-user.target.wants
-# sudo ln -sf /usr/lib/systemd/system/mod-host.service /etc/systemd/system/multi-user.target.wants
-# sudo ln -sf /usr/lib/systemd/system/mod-ui.service /etc/systemd/system/multi-user.target.wants
-# sudo ln -sf /usr/lib/systemd/system/mod-amidithru.service /etc/systemd/system/multi-user.target.wants
-# sudo ln -sf /usr/lib/systemd/system/mod-touchosc2midi.service /etc/systemd/system/multi-user.target.wants
-# sudo ln -sf /usr/lib/systemd/system/mod-midi-merger.service /etc/systemd/system/multi-user.target.wants
-# sudo ln -sf /usr/lib/systemd/system/mod-midi-merger-broadcaster.service /etc/systemd/system/multi-user.target.wants
-
-# #Create users and groups so services can run as user instead of root
-# sudo adduser --no-create-home --system --group jack
-# sudo adduser pistomp jack --quiet
-# sudo adduser root jack --quiet
-# sudo adduser jack audio --quiet
-# sudo cp jackdrc /etc/
-# sudo chmod +x /etc/jackdrc
-# sudo chown jack:jack /etc/jackdrc
-# sudo cp 80 /etc/authbind/byport/
-# sudo chmod 500 /etc/authbind/byport/80
-# sudo chown pistomp:pistomp /etc/authbind/byport/80
+function Invoke-JackConfiguration()
+{
+    pushd setup/mod
+    sudo adduser --no-create-home --system --group jack
+    sudo adduser pistomp jack --quiet
+    sudo adduser root jack --quiet
+    sudo adduser jack audio --quiet
+    sudo cp jackdrc /etc/
+    sudo chmod +x /etc/jackdrc
+    sudo chown jack:jack /etc/jackdrc
+    sudo cp 80 /etc/authbind/byport/
+    sudo chmod 500 /etc/authbind/byport/80
+    sudo chown pistomp:pistomp /etc/authbind/byport/80
+    popd
+}

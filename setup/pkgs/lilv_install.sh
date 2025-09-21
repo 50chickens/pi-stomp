@@ -16,27 +16,27 @@
 # along with pi-stomp.  If not, see <https://www.gnu.org/licenses/>.
 
 # Dependencies
-if (which python3 > /dev/null); then true; else
-  echo "python3 not found, please install it"
-  exit
-fi
+# if (which python3 > /dev/null); then true; else
+#   echo "python3 not found, please install it"
+#   exit
+# fi
 
-if (which pip3 > /dev/null); then true; else
-  echo "pip3 not found, please install it"
-  exit
-fi
+# if (which pip3 > /dev/null); then true; else
+#   echo "pip3 not found, please install it"
+#   exit
+# fi
 
-sudo pip3 install python-config
+# sudo pip3 install python-config
 
-sudo apt-get -y install liblilv-dev lv2-dev libserd-dev libsord-dev libsratom-dev
+# sudo apt-get -y install liblilv-dev lv2-dev libserd-dev libsord-dev libsratom-dev
 
-# Get it
-pushd $(mktemp -d)
-wget http://download.drobilla.net/lilv-0.24.12.tar.bz2
-tar xvf lilv-0.24.12.tar.bz2
-pushd lilv-0.24.12
+# # Get it
+# pushd $(mktemp -d)
+# wget http://download.drobilla.net/lilv-0.24.12.tar.bz2
+# tar xvf lilv-0.24.12.tar.bz2
+# pushd lilv-0.24.12
 
-# configure, build, install
-python3 ./waf configure --prefix=/usr/local  --static --static-progs --no-shared --no-utils --no-bash-completion --pythondir=/usr/local/lib/python3.9/dist-packages
-python3 ./waf build
-sudo python3 ./waf install
+# # configure, build, install
+# python3 ./waf configure --prefix=/usr/local  --static --static-progs --no-shared --no-utils --no-bash-completion --pythondir=/usr/local/lib/python3.9/dist-packages
+# python3 ./waf build
+# sudo python3 ./waf install
