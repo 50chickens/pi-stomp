@@ -114,7 +114,7 @@ printf "\n===== Manage services =====\n"
 setup/services/create_services.sh
 
 printf "\n===== RT Kernel Install =====\n"
-setup/sys/rtkernel.sh
+#setup/sys/rtkernel.sh
 
 printf "\n===== pi-stomp setup complete - rebooting =====\n"
 sudo reboot now
