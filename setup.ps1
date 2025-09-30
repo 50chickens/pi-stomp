@@ -26,6 +26,8 @@ New-PythonVenv -venvPath "~/.env"
 bash python-venv.sh #run this bash script to setup python venv.
 Invoke-InstallMod
 
+alsactl restore -f ./setup/audio/iqaudiocodec.state
+
 if ($installLv2plugins)
 {
     Write-Host "Installing LV2 plugins..."
