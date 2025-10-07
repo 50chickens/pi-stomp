@@ -6,7 +6,6 @@ get-childitem -path $includesFolder/*.ps1 |% {
 
 Test-ImInTheCorrectFolder
 
-
 $ErrorActionPreference = "Stop" #stop on all errors
 
 $installLv2plugins = $true
@@ -24,9 +23,10 @@ New-Folders -foldersToCreate $userFoldersToCreate -baseFolder "~/data/user-files
 
 New-PythonVenv -venvPath "~/.env"
 bash python-venv.sh #run this bash script to setup python venv.
-Invoke-InstallMod
 
-alsactl restore -f ./setup/audio/iqaudiocodec.state
+alsactl restore -f ./setup/audio/iqaudiocodec.state #setup the audio codec
+
+Invoke-InstallMod
 
 if ($installLv2plugins)
 {

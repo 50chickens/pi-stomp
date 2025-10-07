@@ -23,4 +23,5 @@ pip3 install pyalsaaudio python-rtmidi requests RPi.GPIO gfxhat matplotlib rpi_w
 echo "Patching tornado for python 3.11"
 cp ~/.env/lib/python3.11/site-packages/tornado/httputil.py ~/.env/lib/python3.11/site-packages/tornado/httputil.py.bak
 sed -i -e 's/collections.MutableMapping/collections.abc.MutableMapping/' ~/.env/lib/python3.11/site-packages/tornado/httputil.py
+sed -i -e 's/collections.MutableMapping/collections.abc.MutableMapping/' ~/modui-env/lib/python3.11/site-packages/tornado/httputil.py
 sed -i -e 's/collections.Mapping/collections.abc.Mapping/' ~/.env/lib/python3.11/site-packages/browsepy/manager.py
