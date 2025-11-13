@@ -25,6 +25,9 @@ New-PythonVenv -venvPath "~/.env"
 bash python-venv.sh #run this bash script to setup python venv.
 
 alsactl restore -f ./setup/audio/iqaudiocodec.state #setup the audio codec
+alsactl restore --no-ucm -f ./setup/audio/iqaudiocodec.state #setup the audio codec without ucm for pi-stomp. prevents 
+# alsa-lib main.c:1541:(snd_use_case_mgr_open) error: failed to import hw:0 use case configuration -2
+# alsa-lib main.c:1541:(snd_use_case_mgr_open) error: failed to import hw:0 use case configuration -2
 
 Invoke-InstallMod
 
