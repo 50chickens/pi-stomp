@@ -13,21 +13,25 @@ function Test-ImInTheCorrectFolder()
 
 function New-PythonVenv($venvPath)
 {
-    if (Test-Path -Path $venvPath)
+    # expand ~ to actual home path if provided
+    if ($venvPath -imatch "~*") { $venvPath = $venvPath -replace '^~', $HOME }
+
+    if (Test-Path -Path $venvPath -PathType Container)
     {
-        remove-item -Recurse -Force $venvPath
+        Remove-Item -Recurse -Force $venvPath
         Write-Host "Removed existing python virtual environment at $venvPath"
     }
     else
     {
-        Write-Host "Python virtual environment already exists at $venvPath"
+        Write-Host "No existing python virtual environment at $venvPath"
     }
+
     python3 -m venv $venvPath
     Write-Host "Created python virtual environment at $venvPath"
 }
 
-
-function Invoke-ElevatedCommands() #commands in here are the ones that require root access without using sudo (this script is called with sudo pwsh -c etc.)
+#commands in here are the ones that require root access without using sudo (this script is called with sudo pwsh -c etc.)
+function Invoke-ElevatedCommands() 
 {
     if (Test-Path -Path "./elevated.ps1" -PathType Leaf) 
     { 
@@ -64,6 +68,17 @@ function Invoke-PackageInstall()
     sudo apt-get -y install libasound2-dev
     sudo apt install bc bison flex libssl-dev make #required for building linux kernel modules
     #sudo apt-get install -y libjack-jackd2-dev jackd2
+
+    sudo apt update && sudo apt install -y \
+    virtualenv python3-venv python3-pip python3-dev python3-all python3-setuptools python3-zeroconf python3-smbus python3-liblo \
+    build-essential pkg-config cmake debhelper dh-autoreconf dh-python gperf intltool make \
+    libasound2-dev libjack-jackd2-dev libpulse-dev liblilv-dev libserd-dev libsord-dev libsratom-dev lilv-utils liblilv-0-0 lv2-dev \
+    libfreetype6-dev libjpeg-dev libpng-dev libtiff5-dev zlib1g-dev libpng-dev libtiff5-dev libreadline-dev libssl-dev libffi-dev \
+    libarmadillo-dev libavahi-gobject-dev libavcodec-dev libavutil-dev libbluetooth-dev libboost-dev libeigen3-dev libfftw3-dev \
+    libglib2.0-dev libglibmm-2.4-dev libgtk2.0-dev libgtkmm-2.4-dev liblrdf0-dev libsamplerate0-dev libsigc++-2.0-dev libsndfile1-dev \
+    libzita-convolver-dev libzita-resampler-dev libzita-alsa-pcmi-dev zita-alsa-pcmi-utils libfluidsynth-dev librtmidi-dev ladspa-sdk liblo-dev \
+    p7zip-full authbind rcconf hostapd dnsmasq iptables lockfile-progs tree bc bison flex git curl
+
 }
 function New-Folders($foldersToCreate, $baseFolder, [switch] $sudo)
 { 

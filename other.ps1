@@ -15,18 +15,18 @@ sudo tar zxf /tmp/powershell.tar.gz -C /opt/microsoft/powershell/7
 sudo chmod +x /opt/microsoft/powershell/7/pwsh
 sudo ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
 rm /tmp/powershell.tar.gz
-pwsh -Command "write-host 'hello world from $($host.version)'"
+pwsh -Command 'Write-Host "hello world from $($host.version)"'
 
 ### dotnet install 
-apt-get -y install libunwind8 gettext
+## do this as root
+sudo apt-get -y install libunwind8 gettext
 curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
 chmod 755 dotnet-install.sh
-export DOTNET_INSTALL_DIR=/opt/dotnet
-export DOTNET_ROOT=/opt/dotnet
+export DOTNET_INSTALL_DIR=/opt/microsoft/dotnet
+export DOTNET_ROOT=/opt/microsoft/dotnet
 ./dotnet-install.sh --verbose --channel 9.0 
 ./dotnet-install.sh --verbose --channel 8.0 
-
-ln -s /opt/dotnet/dotnet /usr/local/bin
+ln -s /opt/microsoft/dotnet/dotnet /usr/local/bin/dotnet
 
 curl 'https://vscode.download.prss.microsoft.com/dbazure/download/stable/e3a5acfb517a443235981655413d566533107e92/code_1.104.2-1758714550_arm64.deb' -o code.deb
 
