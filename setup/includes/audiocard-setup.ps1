@@ -23,7 +23,21 @@ function Disable-BuiltInAudio()
 {
     (Get-Content -Path "/boot/firmware/config.txt") -replace '^\s*dtparam=audio', '#dtparam=audio' | Set-Content -Path "/boot/firmware/config.txt"
 }
-
+function Disable-BuiltInHdmiaudio()
+{
+    $configTxtPath = "/boot/firmware/config.txt"
+    $configTxtContent = Get-Content -Path $configTxtPath
+    if ($configTxtContent -match "dtoverlay=vc4-kms-v3d") 
+    { 
+        Write-Host "Patching config.txt to disable audio on vc4-kms-v3d overlay..." -ForegroundColor Green
+        $newConfigTxtContent = $configTxtContent -replace "dtoverlay=vc4-kms-v3d", "dtoverlay=vc4-kms-v3d,noaudio"
+        $newConfigTxtContent | Set-Content -Path $configTxtPath
+    } 
+    else 
+    { 
+        Write-Host "No need to patch config.txt, overlay not found." -ForegroundColor Yellow
+    }
+}
 function Enable-AudioOverlay($dtOverlayName = "iqaudio-codec")
 {
 

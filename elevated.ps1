@@ -3,5 +3,8 @@ get-childitem -path ~/pi-stomp/setup/includes/*.ps1 |% {
     . $_.FullName 
 }
 
+Disable-BuiltInHdmiaudio
 Disable-BuiltInAudio
 Enable-AudioOverlay
+
+#reboot required after this.
