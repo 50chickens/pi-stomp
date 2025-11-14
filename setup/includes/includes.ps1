@@ -77,7 +77,7 @@ function Invoke-PackageInstall()
     libarmadillo-dev libavahi-gobject-dev libavcodec-dev libavutil-dev libbluetooth-dev libboost-dev libeigen3-dev libfftw3-dev \
     libglib2.0-dev libglibmm-2.4-dev libgtk2.0-dev libgtkmm-2.4-dev liblrdf0-dev libsamplerate0-dev libsigc++-2.0-dev libsndfile1-dev \
     libzita-convolver-dev libzita-resampler-dev libzita-alsa-pcmi-dev zita-alsa-pcmi-utils libfluidsynth-dev librtmidi-dev ladspa-sdk liblo-dev \
-    p7zip-full authbind rcconf hostapd dnsmasq iptables lockfile-progs tree bc bison flex git curl
+    p7zip-full authbind hostapd dnsmasq iptables lockfile-progs tree bc bison flex git curl
 
 }
 function New-Folders($foldersToCreate, $baseFolder, [switch] $sudo)
