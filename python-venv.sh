@@ -1,10 +1,12 @@
 #!/bin/bash
 source ~/.env/bin/activate
-pip3 install pyserial==3.0 pystache==0.5.4 aggdraw==1.3.11 scandir backports.shutil-get-terminal-size
+# install latest available releases (no exact pins)
+pip3 install pyserial pystache aggdraw scandir backports.shutil-get-terminal-size
 pip3 install python-config
-pip3 install pycrypto
-pip3 install tornado==4.3
-pip3 install Pillow==8.4.0
+# pycrypto is unmaintained; use pycryptodome instead
+pip3 install pycryptodome
+pip3 install tornado
+pip3 install Pillow
 pip3 install cython
 pip3 install browsepy
 pip3 install pyalsaaudio python-rtmidi requests RPi.GPIO gfxhat matplotlib rpi_ws281x adafruit-circuitpython-neopixel adafruit-circuitpython-rgb-display numpy adafruit-circuitpython-mcp3xxx
@@ -20,6 +22,9 @@ pip3 install pyalsaaudio python-rtmidi requests RPi.GPIO gfxhat matplotlib rpi_w
 # pip3 install ./
 # popd
 # popd
+
+
+#### only required for python 3.11 compatibility ####
 echo "Patching tornado for python 3.11"
 cp ~/.env/lib/python3.11/site-packages/tornado/httputil.py ~/.env/lib/python3.11/site-packages/tornado/httputil.py.bak
 sed -i -e 's/collections.MutableMapping/collections.abc.MutableMapping/' ~/.env/lib/python3.11/site-packages/tornado/httputil.py
