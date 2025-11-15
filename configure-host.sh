@@ -39,3 +39,5 @@ rm dotnet-install.sh
 pwsh -Command 'Write-Host "dotnet version from pwsh: $(dotnet --version)"'
 
 popd #return to previous directory
+
+#cd /home/pistomp/pi-stomp && sudo -E pwsh -File /home/pistomp/pi-stomp/configure-host.ps1

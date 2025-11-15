@@ -1,0 +1,11 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Use the Alsa.Net package from nuget.org -->
+    <PackageReference Include="Alsa.Net" Version="1.0.10" />
+  </ItemGroup>
+</Project>
