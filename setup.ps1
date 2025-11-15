@@ -4,10 +4,12 @@ get-childitem -path $includesFolder/*.ps1 |% {
     . $_.FullName 
 }
 
+Test-ICanSudo
+Test-ImInTheCorrectFolder
 #need to do this first
 Invoke-ElevatedCommands #things in here run with sudo - eg sudo pwsh -c "./elevated.ps1"
 
-Test-ImInTheCorrectFolder
+
 
 $ErrorActionPreference = "Stop" #stop on all errors
 
