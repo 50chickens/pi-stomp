@@ -37,10 +37,14 @@ if ([ -z "${VERSION_CODENAME}" ]); then
     exit 1
 fi
 
-echo "----------------------------------------"
-echo "Running elevated powershell scripts..." #requires sudo -E to preserve user environment including home directory
-sudo -E pwsh -File "$WORK_DIR/configure-host-elevated.ps1" -VERSION_CODENAME "${VERSION_CODENAME}" -workingDirectory "$WORK_DIR" #all of the things that need sudo
+dtOverlay="iqaudio-codec"
+alsaDeviceName="IQaudIOCODEC"
+$alsaStatefilename="iqaudiocodec.state"
 
 echo "----------------------------------------"
+echo "Running elevated powershell scripts..." #requires sudo -E to preserve user environment including home directory
+sudo -E pwsh -File "$WORK_DIR/configure-host-elevated.ps1" -VERSION_CODENAME "${VERSION_CODENAME}" -workingDirectory "$WORK_DIR" -requiredOverlayName $dtOverlay -requiredAlsaDeviceName $alsaDeviceName #all of the things that need sudo
+echo "----------------------------------------"
 echo "running audio installation powershell scripts..."
-pwsh -File "$WORK_DIR/configure-host.ps1" -VERSION_CODENAME "${VERSION_CODENAME}" -workingDirectory "$WORK_DIR"
+pwsh -File "$WORK_DIR/configure-host.ps1" -VERSION_CODENAME "${VERSION_CODENAME}" -workingDirectory "$WORK_DIR" -alsaStatefilename $alsaStatefilename
+echo "All done!"

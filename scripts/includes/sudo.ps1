@@ -23,16 +23,3 @@ function Disable-UnusedService($serviceName)
         return
     }
 }
-
-function Invoke-PackageInstall($packageList)
-{
-$expandedPackageList = ($packageList -join " ")
-    apt-get -y install $expandedPackageList
-    
-    apt-get -y install libasound2-dev
-    apt install bc bison flex libssl-dev make #required for building linux kernel modules
-    #sudo apt-get install -y libjack-jackd2-dev jackd2
-
-    apt update && apt install -y 
-
-}

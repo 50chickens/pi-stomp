@@ -1,21 +1,5 @@
 #!/bin/bash
 set -e #exit on any error
-
-if [ "$(id -u)" -ne 0 ]; then
-    echo "This script must be run as root. Please run with sudo."
-    exit 1
-fi
-echo "Current working directory: $(pwd)."
-
-#get the value that ~ resolves to for the user who invoked sudo
-USER_HOME=$(eval echo "~")
-echo "User home directory is $USER_HOME"
-#check that the script is being run with sudo -E by checking if we are in /root
-if [ "$USER_HOME" == "/root" ]; then
-    echo "You need to run this script with sudo -E to keep the users home directory."
-    exit 1
-fi
-
 install_packages_and_update()
 {
     echo "Adding backports repository and installing required packages..."
@@ -73,6 +57,21 @@ disable_ipv6_on_boot()
 {
     echo "ipv6.disable=1" >> /boot/cmdline.txt
 }
+
+if [ "$(id -u)" -ne 0 ]; then
+    echo "This script must be run as root. Please run with sudo."
+    exit 1
+fi
+echo "Current working directory: $(pwd)."
+
+#get the value that ~ resolves to for the user who invoked sudo
+USER_HOME=$(eval echo "~")
+echo "User home directory is $USER_HOME"
+#check that the script is being run with sudo -E by checking if we are in /root
+if [ "$USER_HOME" == "/root" ]; then
+    echo "You need to run this script with sudo -E to keep the users home directory."
+    exit 1
+fi
 
 echo "----------------------------------------"
 echo "Starting elevated host configuration script..."

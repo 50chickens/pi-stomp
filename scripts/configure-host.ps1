@@ -10,35 +10,56 @@ get-childitem -path $includesFolder/*.ps1 |% {
     . $_.FullName 
 }
 
-$requiredOverlays = @(
-"iqaudio-codec"#,
-#"hifiberry-dacplusadc",
-#"audioinjector-wm8731-audio"
-)
-
 Set-WorkingDirectory -workingdirectory $workingDirectory
 
-write-host "----------------------------------------"
-write-host "Starting audio configuration..."
+$installLv2plugins = $true
+$installMidi = $false
+$foldersToCreate = @("data/.pedalboards", "data/user-files")
+$userFoldersToCreate = @("Speaker Cabinets IRs", "Reverb IRs", "Audio Loops", "Audio Recordings", "Audio Samples", "Audio Tracks", "MIDI Clips", "MIDI Songs", "Hydrogen Drumkits", "SF2 Instruments", "SFZ Instruments", "Amplifier Profiles", "Aida DSP Models", "NAM Models")
 
-$configTxtPath = "/boot/firmware/config.txt"
-write-host "----------------------------------------"
-write-host "testing for existing iqaudio device in ALSA..."
-$audioDeviceExists = Test-AudioDeviceExistsInAlsa -audioDeviceName "iqaudio"
-write-host "disabling built-in HDMI audio and built-in audio..."
-Disable-BuiltInHdmiaudio -configTxtPath $configTxtPath
-write-host "disabling built-in audio..."
-Disable-BuiltInAudio -configTxtPath $configTxtPath
-$requiredOverlays |%{
-    write-host "Ensuring audio overlay $_ is enabled in $configTxtPath..."
-    Enable-AudioOverlay -configTxtPath $configTxtPath -overlayName $_    
-    if ($audioDeviceExists) {
-        Write-Host "overlay $_ was already detected before changes to $configTxtPath."
-    }
-    else {
-        write-host "Overlay $_ enabled in $configTxtPath. You may need to reboot for it to take effect."
-    }
+$foldersToCreate |%{
+    $baseFolder = $_
+
+    write-host "Creating folder: $($_)"
+    $userFoldersToCreate |%{
+        $folderName = $baseFolder + "/" + $_
+        write-host "Creating user folder: $folderName"
+        New-Folders -foldersToCreate $folderName
+}
     
 }
-write-host "Audio configuration complete."
-#reboot required after this.
+
+
+New-Folders -foldersToCreate $foldersToCreate -baseFolder "~"
+New-Folders -foldersToCreate $userFoldersToCreate -baseFolder "~/data/user-files"
+
+New-PythonVenv -venvPath "~/.env"
+bash python-venv.sh #run this bash script to setup python venv.
+
+get-childitem -path ../../state/audio  -ErrorAction SilentlyContinue |% {
+    $modalias = get-content $_.FullName
+    write-host "Detected audio device modalias: $modalias"
+}
+
+alsactl restore -f ./setup/audio/iqaudiocodec.state #setup the audio codec
+alsactl restore --no-ucm -f ./setup/audio/iqaudiocodec.state #setup the audio codec without ucm for pi-stomp. prevents 
+
+#patch /boot/firmware/config.txt to ensure audio works correctly with pi-stomp
+#replace dtoverlay=vc4-kms-v3d with dtoverlay=vc4-kms-v3d,noaudio 
+
+# alsa-lib main.c:1541:(snd_use_case_mgr_open) error: failed to import hw:0 use case configuration -2
+# alsa-lib main.c:1541:(snd_use_case_mgr_open) error: failed to import hw:0 use case configuration -2
+
+Invoke-InstallMod
+
+if ($installLv2plugins)
+{
+    Write-Host "Installing LV2 plugins..."
+    New-lv2pluginsfolder
+}
+
+if ($installMidi)
+{
+    Write-Host "Installing MIDI..."
+    Invoke-InstallMidi
+}

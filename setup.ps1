@@ -1,24 +1,9 @@
 
-
-Test-ICanSudo
-$correctFolderName = "$HOME/pi-stomp"
-
-if (-not (Test-ImInTheCorrectFolder -correctFolderName $correctFolderName))
-{
-    write-host "switch to $correctFolderName"
-    cd $correctFolderName
-}
-#need to do this first
-$ErrorActionPreference = "Stop" #stop on all errors
-
 $installLv2plugins = $true
 $installMidi = $false
 $foldersToCreate = @("data/.pedalboards", "data/user-files")
 $sudoFoldersToCreate = @("/usr/mod/scripts")
 $userFoldersToCreate = @("Speaker Cabinets IRs", "Reverb IRs", "Audio Loops", "Audio Recordings", "Audio Samples", "Audio Tracks", "MIDI Clips", "MIDI Songs", "Hydrogen Drumkits", "SF2 Instruments", "SFZ Instruments", "Amplifier Profiles", "Aida DSP Models", "NAM Models")
-
-Test-ICanSudo
-Invoke-PackageInstall #packages that we need to install.
 
 New-Folders -foldersToCreate $foldersToCreate -baseFolder "~"
 New-Folders -foldersToCreate $sudoFoldersToCreate -sudo
