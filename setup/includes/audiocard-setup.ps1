@@ -87,14 +87,26 @@ function Disable-BuiltInAudio($configTxtPath)
 function Disable-BuiltInHdmiaudio($configTxtPath)
 {
     
-    # match lines beginning with optional space then dtoverlay= that mention vc4-kms-v3d
-    $vc4Pattern = "^\s*dtoverlay\s*=.*vc4-kms-v3d"
+    $vc4Pattern = "dtoverlay=vc4-kms-v3d" # should match dtoverlay=vc4-kms-v3d only if it is an exact match 
+
     $vc4Replacement = "dtoverlay=vc4-kms-v3d,noaudio"
+    $fileContent = Get-Content -Path $configTxtPath -Raw
+        
+    #return true is there are any lines that match the pattern exactly, otherwise false
+    $hdmiAudioEnabled = ($fileContent |? {$_ -imatch $vc4Replacement}).Count -ne 1
 
-    $msgNoVc4 = "No vc4-kms-v3d overlay found; nothing to change."
-    $msgWork = "Patched $configTxtPath to set $vc4Replacement."
-
-    Invoke-RegexReplacementOnfile -FilePath $configTxtPath -MatchRegex $vc4Pattern -Replacement $vc4Replacement -NoWorkMessage $msgNoVc4 -WorkMessage $msgWork | Out-Null
+    if ($hdmiAudioEnabled) 
+    {
+        Write-Host "Disabling built-in HDMI audio by modifying vc4-kms-v3d overlay"
+        $replacedContent = $fileContent -replace $vc4Pattern, $vc4Replacement 
+        #$replacedContent | Set-Content -Path $configTxtPath
+    }
+    else 
+    {
+        Write-Host "No vc4-kms-v3d overlay found; nothing to change."
+        return
+    }
+    
 }
 
 # Note: ALSA device testing moved to configure-host.ps1 to keep this file focused.

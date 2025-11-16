@@ -1,9 +1,9 @@
-function Test-ImInTheCorrectFolder()
+function Test-ImInTheCorrectFolder($correctFolderName)
 {
-    if ((pwd).Path -notlike "*pi-stomp*")
+    write-host "Checking current folder: $(pwd).Path"
+    if ((pwd).Path -ne "$correctFolderName")
     {
-        write-host "You are not in the pi-stomp folder. Please run this script from the pi-stomp folder." -ForegroundColor Red
-        exit 1
+        write-host "You are not in the $correctFolderName folder."
     }
     else
     {

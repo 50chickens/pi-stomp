@@ -4,7 +4,6 @@
 
 set -e #exit on any error
 
-pushd
 cd /root
 . /etc/os-release
 echo "deb http://deb.debian.org/debian ${VERSION_CODENAME}-backports main" > \
@@ -37,7 +36,5 @@ export DOTNET_ROOT=/opt/microsoft/dotnet
 ln -s /opt/microsoft/dotnet/dotnet /usr/local/bin/dotnet
 rm dotnet-install.sh
 pwsh -Command 'Write-Host "dotnet version from pwsh: $(dotnet --version)"'
-
-popd #return to previous directory
 
 #cd /home/pistomp/pi-stomp && sudo -E pwsh -File /home/pistomp/pi-stomp/configure-host.ps1
