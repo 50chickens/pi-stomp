@@ -132,7 +132,7 @@ function Disable-BuiltInAudio($configTxtPath)
 function Enable-AudioOverlay($overlayName, $configTxtPath)
 {
 
-    $replacement = "dtparam=$overlayName"
+    $replacement = "dtoverlay=$overlayName"
     $pattern = "dtoverlay=$overlayName"
     $fileContent = Get-Content -Path $configTxtPath -Raw
         
