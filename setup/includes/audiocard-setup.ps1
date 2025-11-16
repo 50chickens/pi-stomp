@@ -93,17 +93,17 @@ function Disable-BuiltInHdmiaudio($configTxtPath)
     $fileContent = Get-Content -Path $configTxtPath -Raw
         
     #return true is there are any lines that match the pattern exactly, otherwise false
-    $hdmiAudioEnabled = ($fileContent |? {$_ -imatch $vc4Replacement}).Count -ne 1
+    $hdmiAudioEnabled = (($fileContent |? {$_ -imatch $vc4Replacement}).Count -ne 1) -and (($fileContent |? {$_ -imatch $vc4Pattern}).Count -ge 1)
 
     if ($hdmiAudioEnabled) 
     {
-        Write-Host "Disabling built-in HDMI audio by modifying vc4-kms-v3d overlay"
+        Write-Host "found vc4-kms-v3d overlay without noaudio; disabling HDMI audio"
         $replacedContent = $fileContent -replace $vc4Pattern, $vc4Replacement 
-        #$replacedContent | Set-Content -Path $configTxtPath
+        $replacedContent | Set-Content -Path $configTxtPath
     }
     else 
     {
-        Write-Host "No vc4-kms-v3d overlay found; nothing to change."
+        Write-Host "HDMI audio already disabled or vc4-kms-v3d overlay not present; no changes made"
         return
     }
     
