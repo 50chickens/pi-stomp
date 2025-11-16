@@ -71,11 +71,19 @@ install_dotnet()
 
 disable_ipv6_on_boot()
 {
-    echo "Disabling IPv6 on boot (will only take effect on reboot)"
     echo "ipv6.disable=1" >> /boot/cmdline.txt
 }
 
-# disable_ipv6_on_boot
-# install_packages_and_update
-# install_pwsh
-# install_dotnet
+echo "----------------------------------------"
+echo "Starting elevated host configuration script..."
+echo "----------------------------------------"
+echo "Disabling IPv6 on boot..."
+disable_ipv6_on_boot
+echo "installing required packages and updating system..."
+install_packages_and_update
+echo "installing PowerShell..."
+install_pwsh
+echo "installing .NET SDK..."
+install_dotnet
+echo "----------------------------------------"
+echo "elevated host configuration script complete."

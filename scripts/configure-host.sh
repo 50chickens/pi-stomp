@@ -1,6 +1,9 @@
 #!/bin/bash
 
 set -e
+echo "----------------------------------------"
+echo "Starting host configuration script..."
+
 WORK_DIR="$HOME/pi-stomp/scripts"
 # ensure the working directory exists
 if [ ! -d "$WORK_DIR" ]; then
@@ -22,13 +25,22 @@ fi
 echo "----------------------------------------"
 echo "configure-host-elevated.sh has execute permissions."
 echo "Running elevated configuration script..."
-
 sudo -E ./configure-host-elevated.sh
 
 # get VERSION_CODENAME and run PowerShell scripts
-
+echo "----------------------------------------"
+echo "Getting OS configuration from /etc/os-release"
 . /etc/os-release #get VERSION_CODENAME
-pwsh -File "$WORK_DIR/configure-host-elevated.ps1" -VERSION_CODENAME "${VERSION_CODENAME}" -workingDirectory "$WORK_DIR" #all of the things that need sudo
+echo "VERSION_CODENAME is ${VERSION_CODENAME}"
+if ([ -z "${VERSION_CODENAME}" ]); then
+    echo "VERSION_CODENAME is empty, cannot continue."
+    exit 1
+fi
+
+echo "----------------------------------------"
+echo "Running elevated powershell scripts..." #requires sudo -E to preserve user environment including home directory
+sudo -E pwsh -File "$WORK_DIR/configure-host-elevated.ps1" -VERSION_CODENAME "${VERSION_CODENAME}" -workingDirectory "$WORK_DIR" #all of the things that need sudo
+
+echo "----------------------------------------"
+echo "running audio installation powershell scripts..."
 pwsh -File "$WORK_DIR/configure-host.ps1" -VERSION_CODENAME "${VERSION_CODENAME}" -workingDirectory "$WORK_DIR"
-
-

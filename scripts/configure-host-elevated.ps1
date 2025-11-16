@@ -43,25 +43,31 @@ function Test-CurrentUserHasRootPermission()
     
 }
 
-
 # ensure the script is running as root (UID 0)
-
 if (-not $uid -or [int]$uid -ne 0) {
     Write-Host "This script must be run as root. Please run with sudo." -ForegroundColor Yellow
     exit 1
 }
 
+write-host "----------------------------------------"
+write-host "Starting elevated host configuration script..."
+write-host "----------------------------------------"
+write-host "Testing for root permissions..."
 Test-CurrentUserHasRootPermission
+write-host "Root permission test passed."
+write-host "Installing main packages..."
+Invoke-PackageInstall -packageList $mainPackages
+write-host "Installing other packages..."
+Invoke-PackageInstall -packageList $otherPackages
 
-#Invoke-PackageInstall -packageList $mainPackages
-# Invoke-PackageInstall -packageList $otherPackages
-
-# if ($installOptionalPackages)
-# {
-#     Write-Host "Installing optional packages..."
-#     Invoke-PackageInstall -packageList $optionalPackages
-# }
-
-# $unusedServices |% {
-#     Disable-UnusedService -serviceName $_
-# }
+if ($installOptionalPackages)
+{
+    
+    Write-Host "Installing optional packages..."
+    Invoke-PackageInstall -packageList $optionalPackages
+}
+write-host "Disabling unused services..."
+$unusedServices |% {
+    Disable-UnusedService -serviceName $_
+}
+write-host "Elevated host configuration script complete."
