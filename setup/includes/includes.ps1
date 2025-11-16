@@ -1,7 +1,7 @@
 function Test-ImInTheCorrectFolder($correctFolderName)
 {
-    write-host "Checking current folder: $(pwd).Path"
-    if ((pwd).Path -ne "$correctFolderName")
+    write-host "Checking current folder: $($(pwd).Path)"
+    if (((pwd).Path) -ne "$correctFolderName")
     {
         write-host "You are not in the $correctFolderName folder."
     }

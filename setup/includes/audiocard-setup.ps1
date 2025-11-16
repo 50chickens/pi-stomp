@@ -115,7 +115,6 @@ function Disable-BuiltInAudio($configTxtPath)
         
     #return true is there are any lines that match the pattern exactly, otherwise false
     $targetStateExists = ($fileContent |? {$_ -imatch $replacement}).Count -ne 1
-    write-host "targetStateExists: $targetStateExists"
     $onboardAudioDisabled = (($fileContent |? {$_ -imatch $replacement}).Count -ne 1 -and (($fileContent |? {$_ -imatch $pattern}).Count -ne 1))
     if ($onboardAudioDisabled) 
     {

@@ -19,11 +19,12 @@ $audioDeviceExists = Test-AudioDeviceExistsInAlsa -audioDeviceName "iqaudio"
 Disable-BuiltInHdmiaudio -configTxtPath $configTxtPath
 Disable-BuiltInAudio -configTxtPath $configTxtPath
 $requiredOverlays |%{
+    Enable-AudioOverlay -configTxtPath $configTxtPath -overlayName $_    
     if ($audioDeviceExists) {
-        Write-Host "Skipping enabling overlay $_ as audio device already detected in ALSA"
+        Write-Host "overlay $_ was already detected before changes to $configTxtPath."
     }
     else {
-        Enable-AudioOverlay -configTxtPath $configTxtPath -overlayName $_    
+        write-host "Overlay $_ enabled in $configTxtPath. You may need to reboot for it to take effect."
     }
     
 }
