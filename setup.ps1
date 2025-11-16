@@ -1,16 +1,14 @@
-$includesFolder = "~/pi-stomp/setup/includes"
-get-childitem -path $includesFolder/*.ps1 |% { 
-    write-host "dot Sourcing $($_.FullName)"
-    . $_.FullName 
-}
+
 
 Test-ICanSudo
-Test-ImInTheCorrectFolder
+$correctFolderName = "$HOME/pi-stomp"
+
+if (-not (Test-ImInTheCorrectFolder -correctFolderName $correctFolderName))
+{
+    write-host "switch to $correctFolderName"
+    cd $correctFolderName
+}
 #need to do this first
-Invoke-ElevatedCommands #things in here run with sudo - eg sudo pwsh -c "./elevated.ps1"
-
-
-
 $ErrorActionPreference = "Stop" #stop on all errors
 
 $installLv2plugins = $true

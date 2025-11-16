@@ -47,43 +47,6 @@ function Test-AudioDeviceExistsInAlsa([string]$audioDeviceName) {
     return $false
 }
 
-# Generic helper: apply a regex replace to a file and write back if it changes.
-# Parameters:
-#  -FilePath: full path to file
-#  -MatchRegex: regex to search for (string, may include inline options like (?m))
-#  -Replacement: replacement text (can include `n for newline)
-#  -NoWorkMessage: message to print when no matches found
-#  -WorkMessage: message to print when replacement is applied
-function Invoke-RegexReplacementOnfile([string]$FilePath, [string]$MatchRegex, [string]$Replacement, [string]$NoWorkMessage, [string]$WorkMessage)
-{
-    $fileContent = Get-Content -Path $FilePath -Raw
-    if (-not ($fileContent -match $MatchRegex)) {
-        Write-Host $NoWorkMessage 
-        return $false
-    }
-
-    $new = [regex]::Replace($fileContent, $MatchRegex, $Replacement)
-    if ($new -ne $fileContent) {
-        Set-Content -Path $FilePath -Value $new
-        Write-Host $WorkMessage 
-        return $true
-    }
-
-    Write-Host $NoWorkMessage 
-    return $false
-}
-
-# function Disable-BuiltInAudio($configTxtPath)
-# {
-
-#     $dtparamPattern = "dtparam=audio=off"
-#     $dtparamReplacement = "#dtparam=audio"
-
-#     $msgNoChange = "No dtparam=audio line found in $configTxtPath; nothing to change."
-#     $msgWork = "Disabled dtparam=audio in $configTxtPath"
-
-#     Invoke-RegexReplacementOnfile -FilePath $configTxtPath -MatchRegex $dtparamPattern -Replacement $dtparamReplacement -NoWorkMessage $msgNoChange -WorkMessage $msgWork | Out-Null
-# }
 function Disable-BuiltInHdmiaudio($configTxtPath)
 {
     
