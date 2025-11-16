@@ -73,32 +73,30 @@ function Invoke-RegexReplacementOnfile([string]$FilePath, [string]$MatchRegex, [
     return $false
 }
 
-function Disable-BuiltInAudio($configTxtPath)
-{
+# function Disable-BuiltInAudio($configTxtPath)
+# {
 
-    $dtparamPattern = "^\s*dtparam=audio"
-    $dtparamReplacement = "#dtparam=audio"
+#     $dtparamPattern = "dtparam=audio=off"
+#     $dtparamReplacement = "#dtparam=audio"
 
-    $msgNoChange = "No dtparam=audio line found in $configTxtPath; nothing to change."
-    $msgWork = "Disabled dtparam=audio in $configTxtPath"
+#     $msgNoChange = "No dtparam=audio line found in $configTxtPath; nothing to change."
+#     $msgWork = "Disabled dtparam=audio in $configTxtPath"
 
-    Invoke-RegexReplacementOnfile -FilePath $configTxtPath -MatchRegex $dtparamPattern -Replacement $dtparamReplacement -NoWorkMessage $msgNoChange -WorkMessage $msgWork | Out-Null
-}
+#     Invoke-RegexReplacementOnfile -FilePath $configTxtPath -MatchRegex $dtparamPattern -Replacement $dtparamReplacement -NoWorkMessage $msgNoChange -WorkMessage $msgWork | Out-Null
+# }
 function Disable-BuiltInHdmiaudio($configTxtPath)
 {
     
-    $vc4Pattern = "dtoverlay=vc4-kms-v3d" # should match dtoverlay=vc4-kms-v3d only if it is an exact match 
-
-    $vc4Replacement = "dtoverlay=vc4-kms-v3d,noaudio"
+    $pattern = "dtoverlay=vc4-kms-v3d" # should match dtoverlay=vc4-kms-v3d only if it is an exact match 
+    $replacement = "dtoverlay=vc4-kms-v3d,noaudio"
     $fileContent = Get-Content -Path $configTxtPath -Raw
         
     #return true is there are any lines that match the pattern exactly, otherwise false
-    $hdmiAudioEnabled = (($fileContent |? {$_ -imatch $vc4Replacement}).Count -ne 1) -and (($fileContent |? {$_ -imatch $vc4Pattern}).Count -ge 1)
-
+    $hdmiAudioEnabled = (($fileContent |? {$_ -imatch $replacement}).Count -ne 1) -and (($fileContent |? {$_ -imatch $pattern}).Count -ge 1)
     if ($hdmiAudioEnabled) 
     {
         Write-Host "found vc4-kms-v3d overlay without noaudio; disabling HDMI audio"
-        $replacedContent = $fileContent -replace $vc4Pattern, $vc4Replacement 
+        $replacedContent = $fileContent -replace $pattern, $replacement 
         $replacedContent | Set-Content -Path $configTxtPath
     }
     else 
@@ -109,33 +107,45 @@ function Disable-BuiltInHdmiaudio($configTxtPath)
     
 }
 
-# Note: ALSA device testing moved to configure-host.ps1 to keep this file focused.
-function Enable-AudioOverlay($overlayName, $configTxtPath)
+function Disable-BuiltInAudio($configTxtPath)
 {
-    Write-Host "Enabling overlay for $overlayName"
-    $content = Get-Content -Path $configTxtPath -Raw
-    $overlayExact = "dtoverlay=$overlayName"
-
-    # match any supported audio overlay line (case-insensitive, multiline aware)
-    $overlayPattern = "(?im)^\s*dtoverlay\s*=.*(?:" + $possibleOverlays + ").*" 
-    $canonicalLine = "dtoverlay=$overlayName`n"
-    $msgOverlayPresent = "Audio overlay $overlayName already present in $configTxtPath"
-    $msgUpdated = "Updated overlay to $overlayName in $configTxtPath"
-    $msgAdding = "Adding audio overlay $overlayName to $configTxtPath"
-    $msgAdded = "Added overlay $overlayName to $configTxtPath"
-    if ($content -match $overlayExact) {
-        Write-Host $msgOverlayPresent 
+    $pattern = "dtparam=audio=on" # should match dtoverlay=vc4-kms-v3d only if it is an exact match 
+    $replacement = "dtparam=audio=off"
+    $fileContent = Get-Content -Path $configTxtPath -Raw
+        
+    #return true is there are any lines that match the pattern exactly, otherwise false
+    $targetStateExists = ($fileContent |? {$_ -imatch $replacement}).Count -ne 1
+    write-host "targetStateExists: $targetStateExists"
+    $onboardAudioDisabled = (($fileContent |? {$_ -imatch $replacement}).Count -ne 1 -and (($fileContent |? {$_ -imatch $pattern}).Count -ne 1))
+    if ($onboardAudioDisabled) 
+    {
+        Write-Host "Onboard audio already disabled; no changes made"
         return
     }
+    
+    Write-Host "Found dtparam=audio=on; disabling onboard audio"
+    $replacedContent = $fileContent -replace $pattern, $replacement 
+    $replacedContent | Set-Content -Path $configTxtPath
 
-        # If a supported audio overlay exists, replace it with a canonical one.
-        if ($content -match $overlayPattern) {
-            Invoke-RegexReplacementOnfile -FilePath $configTxtPath -MatchRegex $overlayPattern -Replacement $canonicalLine -NoWorkMessage $msgOverlayPresent -WorkMessage $msgUpdated | Out-Null
-            return
-        }
+}
 
-    Write-Host $msgAdding 
-    # ensure we append a trailing newline when adding a new line
-    Add-Content -Path $configTxtPath -Value ("dtoverlay=$overlayName`n")
-    Write-Host $msgAdded 
+function Enable-AudioOverlay($overlayName, $configTxtPath)
+{
+
+    $replacement = "dtparam=$overlayName"
+    $pattern = "dtoverlay=$overlayName"
+    $fileContent = Get-Content -Path $configTxtPath -Raw
+        
+    #return true is there are any lines that match the pattern exactly, otherwise false
+    $overlayEnabled = (($fileContent |? {$_ -imatch $replacement}).Count -ne 1) -and (($fileContent |? {$_ -imatch $pattern}).Count -eq 0)
+    if ($overlayEnabled) 
+    {
+        Write-Host "didn't find overlay $overlayName ; enabling it"
+        $replacement | Add-Content -Path $configTxtPath
+    }
+    else 
+    {
+        Write-Host "Overlay $overlayName already enabled."
+        return
+    }
 }

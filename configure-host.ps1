@@ -17,15 +17,15 @@ if (-not (Test-ImInTheCorrectFolder -correctFolderName $correctFolderName))
 $configTxtPath = "/boot/firmware/config.txt"
 $audioDeviceExists = Test-AudioDeviceExistsInAlsa -audioDeviceName "iqaudio"
 Disable-BuiltInHdmiaudio -configTxtPath $configTxtPath
-#Disable-BuiltInAudio -configTxtPath $configTxtPath  "iqaudio-codec"
-# $requiredOverlays |%{
-#     if ($audioDeviceExists) {
-#         Write-Host "Skipping enabling overlay $_ as audio device already detected in ALSA"
-#     }
-#     else {
-#         Enable-AudioOverlay -configTxtPath $configTxtPath -overlayName $_    
-#     }
+Disable-BuiltInAudio -configTxtPath $configTxtPath
+$requiredOverlays |%{
+    if ($audioDeviceExists) {
+        Write-Host "Skipping enabling overlay $_ as audio device already detected in ALSA"
+    }
+    else {
+        Enable-AudioOverlay -configTxtPath $configTxtPath -overlayName $_    
+    }
     
-# }
+}
 
 #reboot required after this.
