@@ -1,16 +1,45 @@
+param (
+    [string] $VERSION_CODENAME,
+    [string] $workingDirectory
+    )   
+
+
+$includesFolder = "includes"
+get-childitem -path $includesFolder/*.ps1 |% { 
+    write-host "dot Sourcing $($_.FullName)"
+    . $_.FullName 
+}
+
+Set-WorkingDirectory -workingdirectory $workingDirectory
 
 $installLv2plugins = $true
 $installMidi = $false
 $foldersToCreate = @("data/.pedalboards", "data/user-files")
-$sudoFoldersToCreate = @("/usr/mod/scripts")
 $userFoldersToCreate = @("Speaker Cabinets IRs", "Reverb IRs", "Audio Loops", "Audio Recordings", "Audio Samples", "Audio Tracks", "MIDI Clips", "MIDI Songs", "Hydrogen Drumkits", "SF2 Instruments", "SFZ Instruments", "Amplifier Profiles", "Aida DSP Models", "NAM Models")
 
+$foldersToCreate |%{
+    $baseFolder = $_
+
+    write-host "Creating folder: $($_)"
+    $userFoldersToCreate |%{
+        $folderName = $baseFolder + "/" + $_
+        write-host "Creating user folder: $folderName"
+        New-Folders -foldersToCreate $folderName
+}
+    
+}
+
+
 New-Folders -foldersToCreate $foldersToCreate -baseFolder "~"
-New-Folders -foldersToCreate $sudoFoldersToCreate -sudo
 New-Folders -foldersToCreate $userFoldersToCreate -baseFolder "~/data/user-files"
 
 New-PythonVenv -venvPath "~/.env"
 bash python-venv.sh #run this bash script to setup python venv.
+
+get-childitem -path ../../state/audio  -ErrorAction SilentlyContinue |% {
+    $modalias = get-content $_.FullName
+    write-host "Detected audio device modalias: $modalias"
+}
 
 alsactl restore -f ./setup/audio/iqaudiocodec.state #setup the audio codec
 alsactl restore --no-ucm -f ./setup/audio/iqaudiocodec.state #setup the audio codec without ucm for pi-stomp. prevents 
