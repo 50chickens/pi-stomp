@@ -6,8 +6,6 @@ using System.Threading.Tasks;
 using Alsa.Net;
 using AlsaWrapper;
 
-// ALSA meter (typed, no reflection) using the Alsa.Net package via AlsaWrapper.
-
 class Program
 {
     static async Task<int> Main(string[] args)
@@ -63,12 +61,6 @@ class Program
         var cts = new CancellationTokenSource();
         Console.CancelKeyPress += (s, e) => { e.Cancel = true; cts.Cancel(); };
 
-        // preflight native dependency check
-        if (!AlsaWrapper.Preflight.CheckAsoundAvailable())
-        {
-            Console.WriteLine("Preflight: libasound not found. Install libasound2 (and libasound2-dev for development) and retry.");
-            return 6;
-        }
 
         // create concrete devices via the wrapper (no reflection/pinvoke)
         ISoundDevice inDeviceObj;
@@ -82,7 +74,7 @@ class Program
             return 5;
         }
 
-    ISoundDevice? outDeviceObj = null;
+        ISoundDevice? outDeviceObj = null;
         if (!string.IsNullOrEmpty(outDevice))
         {
             try
