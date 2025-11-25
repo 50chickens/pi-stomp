@@ -1,42 +1,70 @@
 #!/bin/bash
 #these things need to be done as root
-#sysctl -w net.ipv6.conf.all.disable_ipv6=1 #if you are connected to the host via ssh using ipv6 the connection will drop
 
 set -e #exit on any error
 
-pushd
+function remove_audio_packages {
+    pulseaudio=$(dpkg-query -W -f='${Status}' pulseaudio 2>/dev/null | grep -c "ok installed" || true)
+    fluidsynth=$(dpkg-query -W -f='${Status}' fluidsynth 2>/dev/null | grep -c "ok installed" || true)
+
+    if [ $pulseaudio -eq 0 ] && [ $fluidsynth -eq 0 ]; then
+        echo "Neither pulseaudio nor fluidsynth is installed. Nothing to remove."
+    else
+        echo "Removing pulseaudio and fluidsynth..."
+        apt purge --auto-remove -y 'pulseaudio*'
+        apt purge --auto-remove -y 'fluidsynth*'
+    fi
+
+}
+function disable_ipv6 {
+#disable ipv6 permanently - use ssh -4 in windows terminal to connect via ipv4 so this does not drop.
+    echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
+    echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
+    sysctl -p  
+}
+
+function install_powershell() {
+    # Install PowerShell
+    apt install -y wget libunwind8  
+    sudo mkdir -p /opt/microsoft/powershell/7
+    wget -O /tmp/powershell.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v7.5.4/powershell-7.5.4-linux-arm64.tar.gz
+    tar zxf /tmp/powershell.tar.gz -C /opt/microsoft/powershell/7
+    chmod +x /opt/microsoft/powershell/7/pwsh
+    #ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
+    rm /tmp/powershell.tar.gz
+    pwsh -Command 'Write-Host "hello world from $($host.version)"'
+
+}
+
+function install_dotnet() {
+    apt-get -y install gettext
+    curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
+    chmod 755 dotnet-install.sh
+    export DOTNET_INSTALL_DIR=/opt/microsoft/dotnet
+    export DOTNET_ROOT=/opt/microsoft/dotnet
+    ./dotnet-install.sh --verbose --channel 9.0 
+    #./dotnet-install.sh --verbose --channel 8.0 
+    ln -s /opt/microsoft/dotnet/dotnet /usr/local/bin/dotnet
+    rm dotnet-install.sh
+    pwsh -Command 'Write-Host "dotnet version from pwsh: $(dotnet --version)"'
+}
+pushd .
 cd /root
 . /etc/os-release
 echo "deb http://deb.debian.org/debian ${VERSION_CODENAME}-backports main" > \
     /etc/apt/sources.list.d/backports.list
-apt purge --auto-remove -y 'pulseaudio*'
-apt purge --auto-remove -y 'fluidsynth*'
+
+#test if either pulseaudio or fluidsynth is installed
+remove_audio_packages
+disable_ipv6
 
 apt -y update
 apt -y upgrade
 
-apt install -y wget libunwind8  
+install_powershell
+install_dotnet
 
-sudo mkdir -p /opt/microsoft/powershell/7
-wget -O /tmp/powershell.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v7.5.4/powershell-7.5.4-linux-arm64.tar.gz
-tar zxf /tmp/powershell.tar.gz -C /opt/microsoft/powershell/7
-chmod +x /opt/microsoft/powershell/7/pwsh
-ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
-rm /tmp/powershell.tar.gz
-pwsh -Command 'Write-Host "hello world from $($host.version)"'
-
-### dotnet install 
 ## do this as root
-apt-get -y install gettext
-curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
-chmod 755 dotnet-install.sh
-export DOTNET_INSTALL_DIR=/opt/microsoft/dotnet
-export DOTNET_ROOT=/opt/microsoft/dotnet
-./dotnet-install.sh --verbose --channel 9.0 
-./dotnet-install.sh --verbose --channel 8.0 
-ln -s /opt/microsoft/dotnet/dotnet /usr/local/bin/dotnet
-rm dotnet-install.sh
-pwsh -Command 'Write-Host "dotnet version from pwsh: $(dotnet --version)"'
 
 popd #return to previous directory
 
