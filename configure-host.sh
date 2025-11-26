@@ -17,10 +17,21 @@ function remove_audio_packages {
 
 }
 function disable_ipv6 {
-#disable ipv6 permanently - use ssh -4 in windows terminal to connect via ipv4 so this does not drop.
+    #test if ipv6 is already disabled
+    ipv6_disabled=$(sysctl net.ipv6.conf.all.disable_ipv6 | grep -c "1" || true)
+    if [ $ipv6_disabled -eq 1 ]; then
+        echo "IPv6 is already disabled, skipping"
+        return
+    fi
+    #disable ipv6 on reboot 
     echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
     echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
     sysctl -p  
+
+    #disable ipv6 now
+    echo "Disabling IPv6..."
+    sysctl -w net.ipv6.conf.all.disable_ipv6=1
+    sysctl -w net.ipv6.conf.default.disable_ipv6=1    
 }
 
 function install_powershell() {
@@ -36,7 +47,10 @@ function install_powershell() {
     wget -O /tmp/powershell.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v7.5.4/powershell-7.5.4-linux-arm64.tar.gz
     tar zxf /tmp/powershell.tar.gz -C /opt/microsoft/powershell/7
     chmod +x /opt/microsoft/powershell/7/pwsh
-    #ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
+    if [ -L /usr/bin/pwsh ]; then
+        rm /usr/bin/pwsh
+    fi
+    ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
     rm /tmp/powershell.tar.gz
     pwsh -Command 'Write-Host "hello world from $($host.version)"'
 
@@ -54,8 +68,10 @@ function install_dotnet() {
     chmod 755 dotnet-install.sh
     export DOTNET_INSTALL_DIR=/opt/microsoft/dotnet
     export DOTNET_ROOT=/opt/microsoft/dotnet
-    ./dotnet-install.sh --verbose --channel 9.0 
-    #./dotnet-install.sh --verbose --channel 8.0 
+    ./dotnet-install.sh --verbose --channel 9.0
+    if [ -L /usr/local/bin/dotnet ]; then
+        rm /usr/local/bin/dotnet
+    fi
     ln -s /opt/microsoft/dotnet/dotnet /usr/local/bin/dotnet
     rm dotnet-install.sh
     pwsh -Command 'Write-Host "dotnet version from pwsh: $(dotnet --version)"'
