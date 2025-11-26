@@ -76,8 +76,25 @@ function install_dotnet() {
     rm dotnet-install.sh
     pwsh -Command 'Write-Host "dotnet version from pwsh: $(dotnet --version)"'
 }
+echo "starting configure-host.sh."
+#test if we're running as root
+if [ "$EUID" -ne 0 ]
+    then echo "Please run as root"
+    exit
+fi
+
+#get the value that ~ resolves to for the user who invoked sudo
+USER_HOME=$(eval echo "~")
+echo "User home directory is $USER_HOME"
+#fail if the user's home directory is not /root (means sudo -E was used).
+if [ "$USER_HOME" != "/root" ]; then
+    echo "Don't use sudo -E."
+    exit 1
+fi
+
 pushd .
-cd /root
+cd ~ #should be root now.
+
 . /etc/os-release
 echo "deb http://deb.debian.org/debian ${VERSION_CODENAME}-backports main" > \
     /etc/apt/sources.list.d/backports.list
@@ -92,8 +109,6 @@ apt -y upgrade
 install_powershell
 install_dotnet
 
-## do this as root
-
-popd #return to previous directory
+popd #return to previous directory - should be pi-stomp directory
 
 #cd /home/pistomp/pi-stomp && sudo -E pwsh -File /home/pistomp/pi-stomp/configure-host.ps1
