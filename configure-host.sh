@@ -24,6 +24,12 @@ function disable_ipv6 {
 }
 
 function install_powershell() {
+    #test for pwsh command
+    if command -v pwsh &> /dev/null
+    then
+        echo "PowerShell found, skipping install"
+        return
+    fi
     # Install PowerShell
     apt install -y wget libunwind8  
     sudo mkdir -p /opt/microsoft/powershell/7
@@ -37,6 +43,12 @@ function install_powershell() {
 }
 
 function install_dotnet() {
+    #test for dotnet command 
+    if command -v dotnet &> /dev/null
+    then
+        echo "dotnet found, skipping install"
+        return
+    fi
     apt-get -y install gettext
     curl -sSL https://dot.net/v1/dotnet-install.sh -o dotnet-install.sh
     chmod 755 dotnet-install.sh
