@@ -23,13 +23,15 @@ function disable_ipv6 {
         echo "IPv6 is already disabled, skipping"
         return
     fi
+    echo "ipv6 is present. Disabling on reboot."
+
     #disable ipv6 on reboot 
     echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
     echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
     sysctl -p  
 
     #disable ipv6 now
-    echo "Disabling IPv6..."
+    echo "Disabling IPv6 in current session. This may disrupt network connectivity temporarily."
     sysctl -w net.ipv6.conf.all.disable_ipv6=1
     sysctl -w net.ipv6.conf.default.disable_ipv6=1    
 }
