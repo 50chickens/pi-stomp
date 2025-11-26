@@ -19,26 +19,6 @@ function remove_audio_packages {
     fi
 
 }
-function disable_ipv6 {
-    #test if ipv6 is already disabled
-    ipv6_disabled=$(sysctl net.ipv6.conf.all.disable_ipv6 | grep -c "1" || true)
-    
-    if [ $ipv6_disabled -eq 1 ]; then
-        echo -e "${greenText}IPv6 is already disabled, skipping\e[0m" #print in green text
-        return
-    fi
-    echo -e "${redText}ipv6 is present. Disabling on reboot.\e[0m"
-
-    #disable ipv6 on reboot 
-    echo "net.ipv6.conf.all.disable_ipv6 = 1" >> /etc/sysctl.conf
-    echo "net.ipv6.conf.default.disable_ipv6 = 1" >> /etc/sysctl.conf
-    sysctl -p  
-
-    #disable ipv6 now
-    echo -e "${redText}Disabling IPv6 in current session. This may disrupt network connectivity temporarily.\e[0m"
-    sysctl -w net.ipv6.conf.all.disable_ipv6=1
-    sysctl -w net.ipv6.conf.default.disable_ipv6=1    
-}
 
 function install_powershell() {
     #test for pwsh command
@@ -59,10 +39,12 @@ function install_powershell() {
     wget -O /tmp/powershell.tar.gz https://github.com/PowerShell/PowerShell/releases/download/v7.5.4/powershell-7.5.4-linux-arm64.tar.gz
     tar zxf /tmp/powershell.tar.gz -C /opt/microsoft/powershell/7
     chmod +x /opt/microsoft/powershell/7/pwsh
-    if [ -L /usr/bin/pwsh ]; then
-        rm /usr/bin/pwsh
+    PWSH_PATH="/usr/bin/pwsh"
+    if [ -L $PWSH_PATH ]; then
+        echo -e "${blueText}Removing existing /usr/bin/pwsh symlink and replacing it.\e[0m"
+        rm $PWSH_PATH
     fi
-    ln -s /opt/microsoft/powershell/7/pwsh /usr/bin/pwsh
+    ln -s /opt/microsoft/powershell/7/pwsh $PWSH_PATH
     rm /tmp/powershell.tar.gz
     pwsh -Command 'Write-Host "hello world from $($host.version)"'
     if [ $? -ne 0 ]; then
@@ -91,10 +73,11 @@ function install_dotnet() {
     export DOTNET_INSTALL_DIR=/opt/microsoft/dotnet
     export DOTNET_ROOT=/opt/microsoft/dotnet
     ./dotnet-install.sh --verbose --channel 9.0
-    if [ -L /usr/local/bin/dotnet ]; then
-        rm /usr/local/bin/dotnet
+    dotnet_path="/opt/microsoft/dotnet/dotnet"
+    if [ -L  $dotnet_path]; then
+        rm $dotnet_path
     fi
-    ln -s /opt/microsoft/dotnet/dotnet /usr/local/bin/dotnet
+    ln -s /opt/microsoft/dotnet/dotnet $dotnet_path
     rm dotnet-install.sh
     pwsh -Command 'Write-Host "dotnet version from pwsh: $(dotnet --version)"'
     if [ $? -ne 0 ]; then
@@ -126,14 +109,6 @@ echo "deb http://deb.debian.org/debian ${VERSION_CODENAME}-backports main" > \
     /etc/apt/sources.list.d/backports.list
 
 #test if either pulseaudio or fluidsynth is installed
-echo -e "${blueText}Checking for audio packages to remove...\e[0m"
-remove_audio_packages
-echo -e "${blueText}Disabling IPv6 if enabled...\e[0m"
-disable_ipv6
-echo -e "${blueText}Updating and upgrading packages...\e[0m"
-apt -y update
-echo -e "${blueText}Upgrading packages...\e[0m"
-apt -y upgrade
 echo -e "${blueText}Installing PowerShell if not present...\e[0m"
 install_powershell
 echo -e "${blueText}Installing dotnet if not present...\e[0m"
