@@ -138,8 +138,6 @@ echo -e "${blueText}Installing PowerShell if not present...\e[0m"
 install_powershell
 echo -e "${blueText}Installing dotnet if not present...\e[0m"
 install_dotnet
-echo -e "${blueText}Disabling IPv6 on boot...\e[0m"
-disable_ipv6_on_boot
 echo -e "${blueText}Configuration complete. Returning to previous directory.\e[0m"
 popd #return to previous directory - should be pi-stomp directory
 
