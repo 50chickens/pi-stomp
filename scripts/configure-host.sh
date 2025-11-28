@@ -1,31 +1,24 @@
 #!/bin/bash
 
-set -e
+set -e #exit on any error
+greenText="\e[32m"
+redText="\e[31m"
+blueText="\e[34m"
+
+dtOverlay="iqaudio-codec"
+alsaDeviceName="IQaudIOCODEC"
+alsaStatefilename="iqaudiocodec.state"
+
+. ./configure-host-includes.sh
 echo "----------------------------------------"
 echo "Starting host configuration script..."
 
-WORK_DIR="$HOME/pi-stomp/scripts"
-# ensure the working directory exists
-if [ ! -d "$WORK_DIR" ]; then
-    echo "Working directory $WORK_DIR does not exist"
-    exit 1
-fi
-echo "Working directory is $WORK_DIR"
-# if current directory is not WORK_DIR, change to WORK_DIR
-if [ "$(pwd)" != "$WORK_DIR" ]; then
-    echo "Changing to working directory $WORK_DIR"
-    cd "$WORK_DIR" || { echo "Failed to change directory to $WORK_DIR"; exit 1; }
-fi
-echo "Current directory is $(pwd)"
-# test that ./configure-host-elevated.sh is executable, if not set them
-if [ ! -x ./configure-host-elevated.sh ]; then
-    echo "Setting execute permissions on ./configure-host-elevated.sh"
-    sudo chmod 755 ./configure-host-elevated.sh
-fi
-echo "----------------------------------------"
-echo "configure-host-elevated.sh has execute permissions."
-echo "Running elevated configuration script..."
-sudo -E ./configure-host-elevated.sh
+expected_dir="$HOME/pi-stomp/scripts"
+echo "Current user is $(whoami)"
+
+test_if_non_root_user
+test_we_can_sudo
+switch_to_correct_directory
 
 # get VERSION_CODENAME and run PowerShell scripts
 echo "----------------------------------------"
@@ -37,10 +30,16 @@ if ([ -z "${VERSION_CODENAME}" ]); then
     exit 1
 fi
 
-dtOverlay="iqaudio-codec"
-alsaDeviceName="IQaudIOCODEC"
-$alsaStatefilename="iqaudiocodec.state"
-
+#run configure-host-sudo.sh with sudo (not sudo -E) to do tasks that need root
+HOST_CONFIG_SUDO_SCRIPT="./configure-host-sudo.sh"
+if [ ! -f "$HOST_CONFIG_SUDO_SCRIPT" ]; then
+    echo -e "${redText}File $HOST_CONFIG_SUDO_SCRIPT not found. Cannot continue.\e[0m"
+    exit 1
+fi
+chmod +x "$HOST_CONFIG_SUDO_SCRIPT"
+echo "Running $HOST_CONFIG_SUDO_SCRIPT with sudo..."
+sudo "$HOST_CONFIG_SUDO_SCRIPT"
+exit
 echo "----------------------------------------"
 echo "Running elevated powershell scripts..." #requires sudo -E to preserve user environment including home directory
 sudo -E pwsh -File "$WORK_DIR/configure-host-elevated.ps1" -VERSION_CODENAME "${VERSION_CODENAME}" -workingDirectory "$WORK_DIR" -requiredOverlayName $dtOverlay -requiredAlsaDeviceName $alsaDeviceName #all of the things that need sudo
