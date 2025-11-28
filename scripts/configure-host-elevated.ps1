@@ -1,12 +1,11 @@
 param (
-    [string] $requiredOverlay,
-    [string] $workingDirectory,
-    [string] $alsaDeviceName
+    [string] $dtOverlay,
+    [string] $workingDirectory
     )   
 
-write-host "workingDirectory is $(pwd)."
+Write-Verbose "workingDirectory is $(pwd)."
 $includesFolder = "$(pwd)/includes"
-write-host "dot sourcing: $includesFolder"
+Write-Verbose "dot sourcing: $includesFolder"
 if (-not (Test-Path -Path $includesFolder)) 
 {
     write-host "Includes folder $includesFolder not found." -ForegroundColor Red
@@ -18,9 +17,10 @@ if (-not $includefiles) {
     exit 1
 }
 get-childitem -path $includesFolder -recurse -filter *.ps1 |% { 
-    write-host "dot Sourcing $($_.FullName)"
+    Write-Verbose "dot Sourcing $($_.FullName)"
     . $_.FullName 
 }
+
 Write-Host "----------------------------------------"
 Write-Host "Starting elevated host configuration script..."
 Write-Host "----------------------------------------"
@@ -28,18 +28,11 @@ Write-Host "----------------------------------------"
 Test-WorkingDirectory -workingdirectory $workingDirectory
 Test-CurrentUserHasCorrectPermissions -shouldBeRoot $true
 Get-OSRelease #sets global variables from /etc/os-release
-exit
+
 Invoke-InstallCockpit
-$unusedServices = @(
-"bluetooth.service",
-"dnsmasq.service",
-"cockpit.socket",
-"cockpit.service",
-"exim4.service")
-
-$audioPackages = @("alsa-utils","alsa-ucm-conf","alsa-tools","libasound2-dev")
-
-in
+Install-Audio -dtOverlay $dtOverlay
+$unusedServices = @("bluetooth.service","dnsmasq.service","exim4.service")
+exit
 
 $mainPackages = @("virtualenv","python3-pip","python3-dev","python3-zeroconf","build-essential","libasound2-dev","libjack-jackd2-dev","liblilv-dev","libjpeg-dev","zlib1g-dev","cmake","debhelper","dh-autoreconf","dh-python","gperf","intltool","ladspa-sdk","libarmadillo-dev","libavahi-gobject-dev","libavcodec-dev","libavutil-dev","libbluetooth-dev","libboost-dev","libeigen3-dev","libfftw3-dev","libglib2.0-dev","libglibmm-2.4-dev","libgtk2.0-dev","libgtkmm-2.4-dev","liblrdf0-dev","libsamplerate0-dev","libsigc++-2.0-dev","libsndfile1-dev","libzita-convolver-dev","libzita-resampler-dev","lv2-dev","p7zip-full","python3-all","python3-setuptools","libreadline-dev","zita-alsa-pcmi-utils","hostapd","dnsmasq","iptables","python3-smbus","liblo-dev","python3-liblo","libzita-alsa-pcmi-dev","authbind","libfluidsynth-dev","lockfile-progs","tree")
 

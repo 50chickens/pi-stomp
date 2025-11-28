@@ -1,27 +1,24 @@
-#!/usr/bin/env pwsh
-
-# This file is part of pi-stomp.
-#
-# pi-stomp is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-#
-# pi-stomp is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-#
-# You should have received a copy of the GNU General Public License
-# along with pi-stomp.  If not, see <https://www.gnu.org/licenses/>.
-
-# check the device tree overlay is setup correctly ...
-# firstly disable PWM audio
-# Disable PWM audio by commenting out dtparam=audio in config.txt
-
-
-# Central ALSA test function (kept in configure-host so callers here can use it)
-function Test-AudioDeviceExistsInAlsa([string]$audioDeviceName) {
+function Get-AudioDeviceConfigfromOverlayName
+{
+    param (
+        [string] $configTxtPath,
+        [string] $dtOverLay
+    )
+    $audioDevices = @()
+    $audioDevices += [PSCustomObject]@{alsaDeviceName="IQaudIOCODEC"; dtOverlay="iqaudio-codec";alsaStateFile="iqaudiocodec.state";}
+    $audioDevices += [PSCustomObject]@{alsaDeviceName="HiFiBerry DAC"; dtOverlay="hifiberry-dac";alsaStateFile="hifiberrydac.state";}
+    $audioDevices += [PSCustomObject]@{alsaDeviceName="AudioInjector WM8731"; dtOverlay="audioinjector-wm8731";alsaStateFile="audioinjectorwm8731.state";}
+    write-host "Setting audio card in $configTxtPath to device name: $dtOverlay"
+    $audioDevice = $audioDevices |? { $_.dtOverlay -ieq $dtOverlay  }
+    write-host "Audio device configuration:"
+    
+    write-host "alsaDeviceName: $($audioDevice.alsaDeviceName)"
+    write-host "dtOverlay: $($audioDevice.dtOverlay)"
+    write-host "alsaStateFile: $($audioDevice.alsaStateFile)"
+    return $audioDevice
+}
+function Test-AudioDeviceExistsInAlsa($audioDeviceName) 
+{
     write-host "Checking for audio device matching pattern '$audioDeviceName' in ALSA"
     try {
         $alsactlOutput = & alsactl info 2>&1
@@ -47,67 +44,147 @@ function Test-AudioDeviceExistsInAlsa([string]$audioDeviceName) {
     return $false
 }
 
-function Disable-BuiltInHdmiaudio($configTxtPath)
+function Disable-BuiltInHDMIaudio($configTxtPath)
 {
-    
-    $pattern = "dtoverlay=vc4-kms-v3d" # should match dtoverlay=vc4-kms-v3d only if it is an exact match 
-    $replacement = "dtoverlay=vc4-kms-v3d,noaudio"
+    $inbuiltHDMI = "dtoverlay=vc4-kms-v3d" # should match dtoverlay=vc4-kms-v3d only if it is an exact match 
+    $inbuiltHDMIWithAudioDisabled = "dtoverlay=vc4-kms-v3d,noaudio"
     $fileContent = Get-Content -Path $configTxtPath -Raw
-        
-    #return true is there are any lines that match the pattern exactly, otherwise false
-    $hdmiAudioEnabled = (($fileContent |? {$_ -imatch $replacement}).Count -ne 1) -and (($fileContent |? {$_ -imatch $pattern}).Count -ge 1)
-    if ($hdmiAudioEnabled) 
+    #check if $replacement exists
+    $inbuiltHDMIAudioIsDisabled = ($fileContent |? {$_ -imatch $inbuiltHDMIWithAudioDisabled}).Count -ge 1
+    if ($inbuiltHDMIAudioIsDisabled) 
     {
-        Write-Host "found vc4-kms-v3d overlay without noaudio; disabling HDMI audio"
-        $replacedContent = $fileContent -replace $pattern, $replacement 
-        $replacedContent | Set-Content -Path $configTxtPath
+        Write-Host "HDMI audio already disabled; no changes made"
+        return $false
     }
-    else 
+    #if exists pattern
+    $inbuiltHDMIExists = ($fileContent |? {$_ -imatch $inbuiltHDMI}).Count -ge 1
+    #do replacement 
+    if (!$inbuiltHDMIExists)
     {
-        Write-Host "HDMI audio already disabled or vc4-kms-v3d overlay not present; no changes made"
-        return
+        Add-Content -Path $configTxtPath -Value $inbuiltHDMIWithAudioDisabled
+        Write-Host "Added HDMI audio disable line to config.txt"
+        return $true
     }
-    
+    Write-Host "Found vc4-kms-v3d overlay but audio is not disabled. fixing."
+    $replacedContent = $fileContent -replace $inbuiltHDMI, $inbuiltHDMIWithAudioDisabled 
+    $replacedContent | Set-Content -Path $configTxtPath
+    Write-Host "HDMI audio disabled." 
+    return $true
 }
 
 function Disable-BuiltInAudio($configTxtPath)
 {
-    $pattern = "dtparam=audio=on" # should match dtoverlay=vc4-kms-v3d only if it is an exact match 
-    $replacement = "dtparam=audio=off"
+    $onboardAudioOverLay = "dtparam=audio=on" # should match dtoverlay=vc4-kms-v3d only if it is an exact match 
+    $onboardAudioOverLayDisabled = "dtparam=audio=off"
     $fileContent = Get-Content -Path $configTxtPath -Raw
-        
-    #return true is there are any lines that match the pattern exactly, otherwise false
-    $targetStateExists = ($fileContent |? {$_ -imatch $replacement}).Count -ne 1
-    $onboardAudioDisabled = (($fileContent |? {$_ -imatch $replacement}).Count -ne 1 -and (($fileContent |? {$_ -imatch $pattern}).Count -ne 1))
-    if ($onboardAudioDisabled) 
+    #check if audio overlay is already disabled
+    $onboardAudioOverLayisDisabled = ($fileContent |? {$_ -imatch $onboardAudioOverLayDisabled}).Count -ge 1
+    if ($onboardAudioOverLayisDisabled) 
     {
         Write-Host "Onboard audio already disabled; no changes made"
-        return
+        return $false
     }
-    
-    Write-Host "Found dtparam=audio=on; disabling onboard audio"
-    $replacedContent = $fileContent -replace $pattern, $replacement 
-    $replacedContent | Set-Content -Path $configTxtPath
+    #if onboardAudioOverLay exists 
+    $onboardAudioOverLayExists = ($fileContent |? {$_ -imatch $onboardAudioOverLay}).Count -ge 1
 
+    if ($onboardAudioOverLayExists) 
+    {
+        Write-Host "Found $onboardAudioOverLay; disabling onboard audio"
+        $replacedContent = $fileContent -replace $onboardAudioOverLay, $onboardAudioOverLayDisabled 
+        $replacedContent | Set-Content -Path $configTxtPath
+        return $true
+    }
+    Write-Host "Onboard audio overlay not found; adding line to disable onboard audio"
+    Add-Content -Path $configTxtPath -Value $onboardAudioOverLayDisabled
+    $true
 }
 
-function Enable-AudioOverlay($overlayName, $configTxtPath)
+function Enable-AudioOverlay($dtOverLay, $configTxtPath)
 {
-
-    $replacement = "dtoverlay=$overlayName"
-    $pattern = "dtoverlay=$overlayName"
+    Write-Host "Checking for audio overlay $dtOverLay in $configTxtPath"
+    $pattern = "dtoverlay=$dtOverLay"
     $fileContent = Get-Content -Path $configTxtPath -Raw
         
-    #return true is there are any lines that match the pattern exactly, otherwise false
-    $overlayEnabled = (($fileContent |? {$_ -imatch $replacement}).Count -ne 1) -and (($fileContent |? {$_ -imatch $pattern}).Count -eq 0)
+    #do a regex match on exactly the overlay name to see if it's already enabled
+    $overlayEnabled = ($fileContent |? {$_ -imatch $pattern}).Count -ge 1
     if ($overlayEnabled) 
     {
-        Write-Host "didn't find overlay $overlayName ; enabling it"
-        $replacement | Add-Content -Path $configTxtPath
+        Write-Host "Audio overlay $dtOverLay already enabled; no changes made."
+        return $false
     }
-    else 
+    Write-Host "Enabling audio overlay $dtOverLay in $configTxtPath"
+    Add-Content -Path $configTxtPath -Value $pattern
+    return $true
+}
+
+function Install-AudioPackages($audioPackages)
+{
+    Write-Host "Installing audio packages: $($audioPackages -join ', ')"
+    #create a list of any packages that are not already installed
+    $packagesToInstall = @()
+    foreach ($package in $audioPackages)
     {
-        Write-Host "Overlay $overlayName already enabled."
+        $packageInstalled = dpkg -l | Select-String -Pattern $package
+        if (-not $packageInstalled) 
+        {
+            $packagesToInstall += $package
+        }
+        else 
+        {
+            Write-Host "Package $package is already installed."
+        }
+    }
+    #if any packages need to be installed, install them
+    if ($packagesToInstall.Count -eq 0)
+    {
+        Write-Host "All audio packages are already installed."
         return
+    }
+    Write-Host "Packages to install: $($packagesToInstall -join ', ')"  
+    Invoke-PackageInstall -packageList $packagesToInstall
+}
+
+function Install-Audio($dtOverlay)
+{
+    $audioDevice = Get-AudioDeviceConfigfromOverlayName -dtOverLay $dtOverlay
+    $rebootrequired = $false
+    $configTxtPath = "/boot/firmware/config.txt"
+    write-host "----------------------------------------"
+    write-host "testing for existing iqaudio device in ALSA..."
+    $audioDeviceExists = Test-AudioDeviceExistsInAlsa -audioDeviceName $audioDevice.alsaDeviceName
+    if ($audioDeviceExists) 
+    {
+        Write-Host "Audio device $($audioDevice.alsaDeviceName) already exists in ALSA. No changes to audio configuration required." -ForegroundColor Green
+        return
+    }
+    #assume that if the audio device does not exist in ALSA then we need to configure it.
+    write-host "Disabling built-in HDMI audio and built-in audio..."
+    $hdmiAudioChanged = Disable-BuiltInHdmiaudio -configTxtPath $configTxtPath
+    if ($hdmiAudioChanged) {
+        $rebootrequired = $true
+    }
+    $builtInAudioChanged = Disable-BuiltInAudio -configTxtPath $configTxtPath
+    if ($builtInAudioChanged) {
+        $rebootrequired = $true
+    }
+    write-host "Ensuring audio overlay $dtOverlay is enabled in $configTxtPath..."
+    $overlayChanged = Enable-AudioOverlay -dtOverLay $dtOverlay -configTxtPath $configTxtPath
+    if ($overlayChanged) {
+        $rebootrequired = $true
+    }
+    #each of the audio functions returns true if a change was made that requires a reboot.
+    Write-Verbose "Reboot required: $rebootrequired"
+    #if audioDeviceExists is false but rebootrequired is false then something is wrong. tell the user.
+    if (-not $audioDeviceExists -and -not $rebootrequired) 
+    {
+        write-host "Warning: Audio device $($audioDevice.alsaDeviceName) not found in ALSA, but no changes requiring reboot were made."
+        exit 1
+    }
+
+    if ($rebootrequired -and -not $audioDeviceExists) 
+    {
+        write-host "Overlay $dtOverlay was enabled in $configTxtPath. You need to reboot for it to take effect."
+        Write-Host "Exiting elevated configuration script to allow reboot." -ForegroundColor Yellow
+        exit 1
     }
 }

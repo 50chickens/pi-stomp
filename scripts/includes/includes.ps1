@@ -20,7 +20,7 @@ function Get-OSRelease()
        if ($parts.Length -eq 2) {
            $key = $parts[0].Trim()
            $value = $parts[1].Trim('"')
-           write-host "setting variable $key to $value."
+           Write-Verbose "setting variable $key to $value."
            Set-Variable -Name $key -Value $value -Scope Global
        }
     }

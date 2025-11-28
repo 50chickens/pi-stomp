@@ -11,8 +11,7 @@ function Invoke-InstallCockpit()
     if ($cockpitInstalled) 
     {
         write-host "Found packages matching Cockpit already."
-        $cockpitVersion = dpkg -l |? {$_ -imatch "cockpit"} |% { write-host $_ } |% { ($_ -split '\s+')[2] }
-        write-host "Cockpit version: $cockpitVersion"
+        dpkg -l |? {$_ -imatch "cockpit"} |% { write-host $_ }
         return
     }
     

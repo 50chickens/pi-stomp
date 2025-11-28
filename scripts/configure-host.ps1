@@ -5,7 +5,7 @@ param (
 
 $includesFolder = "includes"
 get-childitem -path $includesFolder/*.ps1 |% { 
-    write-host "dot Sourcing $($_.FullName)"
+    Write-Verbose "dot Sourcing $($_.FullName)"
     . $_.FullName 
 }
 

@@ -1,3 +1,36 @@
+function invoke-elevated-powershell() 
+{
+    #get the exit code from pwsh from inside sudo -E
+    echo "running $configure_host_elevated_script_filename with sudo -E pwsh..."
+    sudo -E pwsh -File "$configure_host_elevated_script_filename" -workingDirectory "$(pwd)" -dtOverlay $dtOverlay #all of the things that need sudo
+    # $? contains the exit code of the script run by sudo -E. print it out 
+    local elevated_exit_code=$?
+    echo "Elevated powershell script exited with code $elevated_exit_code"
+    
+    #test for exit code 1 from elevated script indicating reboot required. use switch case to avoid issues with set -e
+    case $elevated_exit_code in
+        1)
+            echo "** configure-host.sh: Reboot required after elevated configuration. Please reboot the system and re-run configure-host.sh to complete audio configuration. **"
+            exit 0
+            ;;
+        2)
+            echo "** configure-host.sh: An error occurred during elevated configuration. Please check the output above. **"
+            exit 1
+            ;;
+        3) #no alsa device found but changes to config.txt already made.
+            echo "** configure-host.sh: No audio device found in ALSA but changes to config.txt already made. Please reboot the system and re-run configure-host.sh to complete audio configuration. **"
+            exit 0
+            ;;
+        0)
+            echo "** configure-host.sh: Elevated configuration completed successfully. Continuing with audio configuration. **"
+            ;;
+        *)
+            echo "** configure-host.sh: An unexpected error occurred during elevated configuration. Please check the output above. **"
+            exit 1
+            ;;
+    esac
+}
+
 function test_if_were_non_root_user() {
     echo -e "${blueText}Checking if running as root...\e[0m"
     #check if we're running as root or the current home folder is /root. fail if so. we're use sudo where we need to later.

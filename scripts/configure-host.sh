@@ -1,13 +1,17 @@
 #!/bin/bash
 
-set -e #exit on any error
+#set -e #exit on any error
 greenText="\e[32m"
 redText="\e[31m"
 blueText="\e[34m"
 
 dtOverlay="iqaudio-codec"
-alsaDeviceName="IQaudIOCODEC"
-alsaStatefilename="iqaudiocodec.state"
+#dtOverLay="iqaudio-dacplus"
+#dtOverlay="hifiberry-dacplus"
+#dtOverlay="hifiberry-dac"
+#dtOverlay="audioinjector-wm8731"
+#dtOverlay="audioinjector-ultra"
+
 
 . ./configure-host-includes.sh
 echo "----------------------------------------"
@@ -43,9 +47,11 @@ chmod +x "$HOST_CONFIG_SUDO_SCRIPT"
 echo "Running $HOST_CONFIG_SUDO_SCRIPT with sudo..."
 sudo "$HOST_CONFIG_SUDO_SCRIPT"
 echo "----------------------------------------"
-echo "Running elevated powershell scripts..." #requires sudo -E to preserve user environment including home directory
-sudo -E pwsh -File "$configure_host_elevated_script_filename" -workingDirectory "$(pwd)" -requiredOverlayName $dtOverlay -requiredAlsaDeviceName $alsaDeviceName #all of the things that need sudo
+invoke-elevated-powershell
+echo "----------------------------------------"
+exit
+echo "9832497239"
 echo "----------------------------------------"
 echo "running audio installation powershell scripts..."
-pwsh -File "$configure_host_script_filename" -workingDirectory "$(pwd)" -alsaStatefilename $alsaStatefilename
+pwsh -File "$configure_host_script_filename" -workingDirectory "$(pwd)" -dtOverlay $dtOverlay
 echo "All done!"
