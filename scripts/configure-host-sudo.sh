@@ -10,8 +10,9 @@ if [ ! -f "$CONFIGURE_HOST_INCLUDES" ]; then
 fi
 . "$CONFIGURE_HOST_INCLUDES"
 
-test_if_root
+test_if_were_root
 test_if_were_in_root_directory
 install_backports
 install_powershell
 install_dotnet
+disable_ipv6_on_boot

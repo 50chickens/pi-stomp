@@ -1,12 +1,3 @@
-function Invoke-InstallCockpit() 
-{
-    apt-get install -y -t ${VERSION_CODENAME}-backports cockpit sscg
-    sudo apt-get install -y gettext nodejs npm make
-    git clone https://github.com/cockpit-project/cockpit-files.git
-    cd cockpit-files
-    make install
-}
-
 #systemctl start cockpit
 function Disable-UnusedService($serviceName)
 {

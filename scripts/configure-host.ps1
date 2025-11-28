@@ -1,5 +1,4 @@
 param (
-    [string] $VERSION_CODENAME,
     [string] $workingDirectory
     )   
 
@@ -10,8 +9,9 @@ get-childitem -path $includesFolder/*.ps1 |% {
     . $_.FullName 
 }
 
-Set-WorkingDirectory -workingdirectory $workingDirectory
-
+Test-WorkingDirectory -workingdirectory $workingDirectory
+Get-OSRelease #sets global variables from /etc/os-release
+exit
 $installLv2plugins = $true
 $installMidi = $false
 $foldersToCreate = @("data/.pedalboards", "data/user-files")

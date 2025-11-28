@@ -1,4 +1,4 @@
-function test_if_non_root_user() {
+function test_if_were_non_root_user() {
     echo -e "${blueText}Checking if running as root...\e[0m"
     #check if we're running as root or the current home folder is /root. fail if so. we're use sudo where we need to later.
     if [ "$(id -u)" -eq 0 ] || [ "$HOME" == "/root" ]; then
@@ -29,7 +29,7 @@ function switch_to_correct_directory()
     echo -e "${greenText}We're in the expected directory $expected_dir\e[0m"
 }
 
-function test_if_root() 
+function test_if_were_root() 
 {
     if [ "$EUID" -ne 0 ]
         then echo -e "${redText}Please run as root\e[0m"
@@ -126,4 +126,16 @@ function install_dotnet() {
         exit 1
     fi
     echo -e "${greenText} dotnet installation succeeded.\e[0m"
+}
+
+disable_ipv6_on_boot()
+{
+    echo -e "${blueText}Checking if IPv6 is already disabled on boot...\e[0m"
+    #test if ipv6.disable=1 is already in /boot/cmdline.txt
+    if grep -q "ipv6.disable=1" /boot/cmdline.txt; then
+        echo -e "${greenText}IPv6 is already disabled on boot, skipping.\e[0m"
+        return
+    fi
+    echo "ipv6.disable=1" >> /boot/cmdline.txt #only takes effect on next boot
+    echo -e "${greenText}IPv6 disabled on boot. changes will take effect on next reboot.\e[0m"
 }

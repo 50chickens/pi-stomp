@@ -14,9 +14,12 @@ echo "----------------------------------------"
 echo "Starting host configuration script..."
 
 expected_dir="$HOME/pi-stomp/scripts"
+configure_host_elevated_script_filename="./configure-host-elevated.ps1"
+configure_host_script_filename="./configure-host.ps1"
+
 echo "Current user is $(whoami)"
 
-test_if_non_root_user
+test_if_were_non_root_user
 test_we_can_sudo
 switch_to_correct_directory
 
@@ -41,8 +44,8 @@ echo "Running $HOST_CONFIG_SUDO_SCRIPT with sudo..."
 sudo "$HOST_CONFIG_SUDO_SCRIPT"
 echo "----------------------------------------"
 echo "Running elevated powershell scripts..." #requires sudo -E to preserve user environment including home directory
-sudo -E pwsh -File "$WORK_DIR/configure-host-elevated.ps1" -VERSION_CODENAME "${VERSION_CODENAME}" -workingDirectory "$WORK_DIR" -requiredOverlayName $dtOverlay -requiredAlsaDeviceName $alsaDeviceName #all of the things that need sudo
+sudo -E pwsh -File "$configure_host_elevated_script_filename" -workingDirectory "$(pwd)" -requiredOverlayName $dtOverlay -requiredAlsaDeviceName $alsaDeviceName #all of the things that need sudo
 echo "----------------------------------------"
 echo "running audio installation powershell scripts..."
-pwsh -File "$WORK_DIR/configure-host.ps1" -VERSION_CODENAME "${VERSION_CODENAME}" -workingDirectory "$WORK_DIR" -alsaStatefilename $alsaStatefilename
+pwsh -File "$configure_host_script_filename" -workingDirectory "$(pwd)" -alsaStatefilename $alsaStatefilename
 echo "All done!"

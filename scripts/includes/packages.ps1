@@ -1,6 +1,25 @@
 function Invoke-PackageInstall($packageList)
 {
-    # $expandedPackageList = $packageList -join " "
-    # write-verbose "Installing packages: $expandedPackageList"
+    $expandedPackageList = $packageList -join " "
+    write-verbose "Installing packages: $expandedPackageList"
     apt-get -y install $packageList   
+}
+function Invoke-InstallCockpit() 
+{
+    #check if cockpit is already installed. print it's version as well 
+    $cockpitInstalled = dpkg -l | Select-String -Pattern "cockpit"
+    if ($cockpitInstalled) 
+    {
+        write-host "Found packages matching Cockpit already."
+        $cockpitVersion = dpkg -l |? {$_ -imatch "cockpit"} |% { write-host $_ } |% { ($_ -split '\s+')[2] }
+        write-host "Cockpit version: $cockpitVersion"
+        return
+    }
+    
+    write-host "Displaying available cockpit versions in apt repos..."
+    apt-cache policy cockpit
+
+    write-host "Installing Cockpit web admin interface..."
+    add-content -Path /etc/apt/sources.list.d/debian-unstable.list "http://deb.debian.org/debian unstable main"
+    apt-get install -y cockpit
 }
