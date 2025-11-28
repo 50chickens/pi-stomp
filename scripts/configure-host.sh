@@ -39,7 +39,6 @@ fi
 chmod +x "$HOST_CONFIG_SUDO_SCRIPT"
 echo "Running $HOST_CONFIG_SUDO_SCRIPT with sudo..."
 sudo "$HOST_CONFIG_SUDO_SCRIPT"
-exit
 echo "----------------------------------------"
 echo "Running elevated powershell scripts..." #requires sudo -E to preserve user environment including home directory
 sudo -E pwsh -File "$WORK_DIR/configure-host-elevated.ps1" -VERSION_CODENAME "${VERSION_CODENAME}" -workingDirectory "$WORK_DIR" -requiredOverlayName $dtOverlay -requiredAlsaDeviceName $alsaDeviceName #all of the things that need sudo
