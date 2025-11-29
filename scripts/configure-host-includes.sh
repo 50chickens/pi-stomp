@@ -1,12 +1,25 @@
 function invoke-elevated-powershell() 
 {
+    #print out the value of ELEVATED_EXIT_CODE if we found it.
+    echo "checking for environment variables from previous runs."
+    if [ ! -z "$ELEVATED_EXIT_CODE" ]; then
+        echo "ELEVATED_EXIT_CODE is set to $ELEVATED_EXIT_CODE"
+    else
+        echo "ELEVATED_EXIT_CODE not found."
+    fi
+    #test for ELEVATED_EXIT_CODE environment variable. if the value is 1 tell the user and exit.
+    if [ "$ELEVATED_EXIT_CODE" == "1" ]; then
+        echo "** configure-host.sh: Reboot required after elevated configuration. Please reboot the system and re-run configure-host.sh to complete audio configuration. **"
+        exit 0
+    fi
     #get the exit code from pwsh from inside sudo -E
     echo "running $configure_host_elevated_script_filename with sudo -E pwsh..."
     sudo -E pwsh -File "$configure_host_elevated_script_filename" -workingDirectory "$(pwd)" -dtOverlay $dtOverlay #all of the things that need sudo
     # $? contains the exit code of the script run by sudo -E. print it out 
     local elevated_exit_code=$?
     echo "Elevated powershell script exited with code $elevated_exit_code"
-    
+    #set an environment variable with the exit code for use after this function returns
+    export ELEVATED_EXIT_CODE=$elevated_exit_code
     #test for exit code 1 from elevated script indicating reboot required. use switch case to avoid issues with set -e
     case $elevated_exit_code in
         1)

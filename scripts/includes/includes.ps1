@@ -1,8 +1,7 @@
 function Test-WorkingDirectory($workingDirectory)
 {
-    write-host "----------------------------------------"
-    write-host "Testing if working directory is $workingDirectory."
-    Write-Host "Checking current folder: $($(pwd).Path)"
+    Write-Host "Testing if working directory is $workingDirectory." -ForegroundColor Blue
+    Write-Host "Checking current folder: $($(pwd).Path)" -ForegroundColor Blue
     if (((pwd).Path) -ne "$workingDirectory")
     {
         Write-Host "$((pwd).Path) is not the right directory."
@@ -24,19 +23,4 @@ function Get-OSRelease()
            Set-Variable -Name $key -Value $value -Scope Global
        }
     }
-}
-function New-lv2pluginsfolder()
-{
-    if (Test-Path -Path "~/.lv2")
-    {
-        Write-Host "~/.lv2 folder already exists"
-        remove-item -Recurse -Force ~/.lv2
-    }
-    if (Test-Path -Path "~/data/.lv2")
-    {
-        Write-Host "~/data/.lv2 folder already exists .Removing"
-        remove-item -force ~/data/.lv2 #remove item won't remove symlinks where the target is missing.
-    }
-    Write-Host "linking ~/data/.lv2 folder to ~/.lv2"
-    ln -s ~/.lv2 ~/data/.lv2
 }
