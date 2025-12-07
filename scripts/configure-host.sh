@@ -12,10 +12,6 @@ dtOverlay="iqaudio-codec"
 #dtOverlay="audioinjector-wm8731"
 #dtOverlay="audioinjector-ultra"
 
-function git_clone_or_pull_repos{
-    git clone https://github.com/50chickens/audio-linux.git
-}
-
 . ./configure-host-includes.sh
 echo "----------------------------------------"
 echo "Starting host configuration script..."
