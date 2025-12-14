@@ -19,6 +19,5 @@ function Invoke-InstallCockpit()
     apt-cache policy cockpit
 
     write-host "Installing Cockpit web admin interface..."
-    add-content -Path /etc/apt/sources.list.d/debian-unstable.list "http://deb.debian.org/debian unstable main"
     apt-get install -y cockpit
 }
