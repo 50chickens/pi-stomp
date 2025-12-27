@@ -1,26 +1,29 @@
-function New-Folders($foldersToCreate)
+function New-Folders($foldersToCreate, $baseFolder)
 { 
     $foldersToCreate |%{
         $folderToCreate = $_
-        #create folder if it does not exist 
-        if (-not (Test-Path -Path $folderToCreate -PathType Container))
+        if (![string]::IsNullOrEmpty($baseFolder))
         {
-            New-Item -ItemType Directory -Path $folderToCreate | Out-Null
-            Write-Host "Created folder: $folderToCreate" -ForegroundColor Green
+            write-host ""
+            $fullPath = Join-Path -Path $baseFolder -ChildPath $folderToCreate
+        }
+        else {
+            $fullPath = $folderToCreate
+        }
+        #create folder if it does not exist 
+        if (-not (Test-Path -Path $fullPath -PathType Container))
+        {
+            New-Item -ItemType Directory -Path $fullPath | Out-Null
+            Write-Host "Created folder: $fullPath" -ForegroundColor Green
         }
         else
         {
-            Write-Host "Folder already exists: $folderToCreate" -ForegroundColor Green
+            Write-Host "Folder already exists: $fullPath" -ForegroundColor Green
         }
     }
 }
 function New-lv2pluginsfolder()
 {
-    if (Test-Path -Path "~/.lv2")
-    {
-        Write-Host "~/.lv2 folder already exists" -ForegroundColor Yellow
-        remove-item -Recurse -Force ~/.lv2
-    }
     if (Test-Path -Path "~/data/.lv2")
     {
         Write-Host "~/data/.lv2 folder already exists .Removing" -ForegroundColor Yellow

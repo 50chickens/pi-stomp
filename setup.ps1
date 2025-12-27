@@ -2,12 +2,10 @@
 $installLv2plugins = $true
 $installMidi = $false
 $foldersToCreate = @("data/.pedalboards", "data/user-files")
-$sudoFoldersToCreate = @("/usr/mod/scripts")
 $userFoldersToCreate = @("Speaker Cabinets IRs", "Reverb IRs", "Audio Loops", "Audio Recordings", "Audio Samples", "Audio Tracks", "MIDI Clips", "MIDI Songs", "Hydrogen Drumkits", "SF2 Instruments", "SFZ Instruments", "Amplifier Profiles", "Aida DSP Models", "NAM Models")
 
-New-Folders -foldersToCreate $foldersToCreate -baseFolder "~"
-New-Folders -foldersToCreate $sudoFoldersToCreate -sudo
-New-Folders -foldersToCreate $userFoldersToCreate -baseFolder "~/data/user-files"
+New-Folders -foldersToCreate $foldersToCreate -baseFolder "~/"
+New-Folders -foldersToCreate $userFoldersToCreate -baseFolder "~/data/user-files/"
 
 New-PythonVenv -venvPath "~/.env"
 bash python-venv.sh #run this bash script to setup python venv.

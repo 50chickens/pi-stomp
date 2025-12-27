@@ -7,8 +7,11 @@ $ErrorActionPreference = "Stop"
 Write-host "Audio configuration script started with parameters:"
 Write-host "  dtOverlay: $dtOverlay"
 Write-host "  configTxtPath: $configTxtPath"
-#Write-host "  expectedDirectory: $expectedDirectory"
 
+$user = "pistomp"
+$group = "jack"
+$jackUser = "jack"
+$jackFolder = "../../setup/mod"
 $servicesToDisable = @("bluetooth","dnsmasq","exim4")
 $cockPitPackages = @("cockpit","cockpit-packagekit","cockpit-storaged","cockpit-networkmanager")
 
@@ -51,6 +54,71 @@ foreach ($param in $parametersToValidate)
     Test-ScriptParametersAreValid -paramValue $param.Value -paramName $param.Name
 }
 
+function Invoke-AudioUserAndGroupConfiguration($group, $user, $jackUser)
+{
+    write-host "Configuring audio users and groups for user $user, group $group, jack user $jackUser"
+    # Create jack user and group if they don't exist
+    if ($null -eq (getent group $jackUser)) 
+    {
+        Write-Host "Creating system group: jack"
+        groupadd --system $jackUser
+    }
+    if ($null -eq (getent passwd $jackUser)) 
+    {
+        Write-Host "Creating system user: $jackUser"
+        adduser --no-create-home --system --group jack $jackUser
+    }
+
+    $groupsToAdd = @(
+        @{ User = "$user"; Group = $jackUser },
+        @{ User = "$user"; Group = "audio" },
+        @{ User = "root"; Group = $jackUser },
+        @{ User = $jackUser; Group = "audio" }
+    )
+
+    foreach ($groupAdd in $groupsToAdd) 
+    {
+        $isInGroup = id -nG $($groupAdd.User) | grep -qw $($groupAdd.Group)
+        if (-not $isInGroup) 
+        {
+            Write-Host "Adding user $($groupAdd.User) to group $($groupAdd.Group)"
+            usermod -aG $($groupAdd.Group) $($groupAdd.User)
+        } 
+        else 
+        {
+            Write-Host "User $($groupAdd.User) is already in group $($groupAdd.Group)"
+        }
+    }
+}
+function Invoke-JackConfiguration($user, $jackUser, $jackFolder)
+{
+    write-host "Configuring JACK settings for user $user and jack user $jackUser. Jack folder: $jackFolder"
+    # Copy and configure jackdrc
+    if (Test-Path "/etc/jackdrc")
+    {
+        write-Host "Removing existing /etc/jackdrc"
+        rm -f /etc/jackdrc
+    } 
+    Write-Host "Copying jackdrc to /etc/"
+    cp "$jackFolder/jackdrc" /etc/
+    chmod +x /etc/jackdrc
+    $chown = @($jackUser,$jackUser) -join ":"
+    Write-Host "Setting ownership of /etc/jackdrc to $chown"
+    chown $chown /etc/jackdrc
+
+    if (Test-Path "/etc/authbind/byport/80")
+    {
+        write-Host "Removing existing /etc/authbind/byport/80"
+        rm -f /etc/authbind/byport/80
+    }
+    Write-Host "Copying authbind configuration for port 80"
+    cp "$jackFolder/80" /etc/authbind/byport/
+    chmod 500 /etc/authbind/byport/80
+    Write-Host "Setting ownership of /etc/authbind/byport/80 to $user"
+    $chown = @($user,$user) -join ":"
+    chown $chown /etc/authbind/byport/80
+}
+
 Write-Host "----------------------------------------"
 Write-Host "Starting elevated host configuration script..."
 Write-Host "----------------------------------------"
@@ -84,4 +152,9 @@ Write-Host "----------------------------------------"
 Write-Host "creating sudo folders..."
 New-Folders -FoldersToCreate $sudoFoldersToCreate
 Write-Host "----------------------------------------"
-write-host "Elevated OS configuration complete."
+Write-Host "Creating audio configuration..."
+Invoke-AudioUserAndGroupConfiguration -group $group -user $user -jackUser $jackUser
+
+Write-Host "----------------------------------------"
+Invoke-JackConfiguration -user $user -jackUser $jackUser -jackFolder $jackFolder
+write-host "Elevated OS configuration complete"
