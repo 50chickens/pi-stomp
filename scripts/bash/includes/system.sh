@@ -13,8 +13,8 @@ function invoke-elevated-powershell()
         exit 0
     fi
     #get the exit code from pwsh from inside sudo -E
-    echo "running $configure_host_elevated_script_filename with sudo -E pwsh..."
-    sudo -E pwsh -File "$configure_host_elevated_script_filename" -workingDirectory "$(pwd)" -dtOverlay $dtOverlay -configTxtPath $configTxtPath #all of the things that need sudo
+    echo "running $configure_host_powershell_script_filename with sudo -E pwsh..."
+    sudo -E pwsh -File "$configure_host_powershell_script_filename" -BaseDirectory $base_powershell_directory -dtOverlay $dtOverlay -configTxtPath $configTxtPath #all of the things that need sudo
     # $? contains the exit code of the script run by sudo -E. print it out 
     local elevated_exit_code=$?
     echo "Elevated powershell script exited with code $elevated_exit_code"
@@ -67,12 +67,12 @@ function test_we_can_sudo() {
 function switch_to_correct_directory() 
 {
     echo -e "${blueText}The current directory is $(pwd)"
-    echo -e "${blueText}Checking if we're in the expected directory $expected_dir\e[0m"
-    if [ "$(pwd)" != "$expected_dir" ]; then
-    echo -e "${blueText}Changing to expected directory $expected_dir\e[0m"
-    cd "$expected_dir" || { echo -e "${redText}Failed to change directory to $expected_dir\e[0m"; exit 1; }
+    echo -e "${blueText}Checking if we're in the expected directory $base_directory\e[0m"
+    if [ "$(pwd)" != "$base_directory" ]; then
+    echo -e "${blueText}Changing to expected directory $base_directory\e[0m"
+    cd "$base_directory" || { echo -e "${redText}Failed to change directory to $base_directory\e[0m"; exit 1; }
     fi
-    echo -e "${greenText}We're in the expected directory $expected_dir\e[0m"
+    echo -e "${greenText}We're in the expected directory $base_directory\e[0m"
 }
 
 function test_if_were_root() 

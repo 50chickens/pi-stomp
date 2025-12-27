@@ -21,7 +21,7 @@ function Get-Services()
     }
     return $services
 }
-function Disable-UnusedService($service)
+function Disable-Service($service)
 {
         
     if (-not $service) 
@@ -42,5 +42,35 @@ function Disable-UnusedService($service)
     {
         Write-host "Service $($service.name) is running, stopping." -ForegroundColor Green
         systemctl stop $($service.name)
+    }
+}
+
+function Disable-Services($servicesToDisable)
+{
+    $services = Get-Services
+    $servicesToDisable |% {
+        $serviceToProcess = $_
+        $service = $services |? { $_.Name -imatch $serviceToProcess}
+        if (-not $service) 
+        {
+            write-host "Service $serviceToProcess not found on system, skipping." -ForegroundColor Yellow
+            return
+        }
+        write-host "Found service: $($service.Name). Checking if it needs to be stopped/disabled..."
+        Disable-Service -service $service 
+    }
+    
+}
+
+function Get-OSRelease()
+{
+    Get-Content -Path "/etc/os-release" |%{
+       $parts = $_ -split '='
+       if ($parts.Length -eq 2) {
+           $key = $parts[0].Trim()
+           $value = $parts[1].Trim('"')
+           Write-Verbose "setting variable $key to $value."
+           Set-Variable -Name $key -Value $value -Scope Global
+       }
     }
 }

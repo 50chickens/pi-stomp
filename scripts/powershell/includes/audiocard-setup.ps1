@@ -150,7 +150,7 @@ function Install-AudioPackages($audioPackages)
 
 function Install-Audio($configTxtPath, $dtOverlay)
 {
-    $audioDevice = Get-AudioDeviceConfigfromOverlayName -dtOverLay $dtOverlay
+    $audioDevice = Get-AudioDeviceConfigfromOverlayName -configTxtPath $configTxtPath -dtOverLay $dtOverlay
     $rebootrequired = $false
     write-host "----------------------------------------"
     write-host "testing for existing $($audioDevice.alsaDeviceName) device in ALSA..."

@@ -28,5 +28,4 @@ function Test-CurrentUserHasCorrectPermissions($shouldBeRoot = $true)
             Write-Host "Current user does not have root privileges as expected. uid=$uid. Continuing." -ForegroundColor Green
         }
     }
-    
 }

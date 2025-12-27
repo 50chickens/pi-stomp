@@ -1,14 +1,17 @@
-function New-Folder($folderToCreate)
+function New-Folders($foldersToCreate)
 { 
-    #create folder if it does not exist 
-    if (-not (Test-Path -Path $folderToCreate -PathType Container))
-    {
-        New-Item -ItemType Directory -Path $folderToCreate | Out-Null
-        Write-Host "Created folder: $folderToCreate" -ForegroundColor Green
-    }
-    else
-    {
-        Write-Host "Folder already exists: $folderToCreate" -ForegroundColor Green
+    $foldersToCreate |%{
+        $folderToCreate = $_
+        #create folder if it does not exist 
+        if (-not (Test-Path -Path $folderToCreate -PathType Container))
+        {
+            New-Item -ItemType Directory -Path $folderToCreate | Out-Null
+            Write-Host "Created folder: $folderToCreate" -ForegroundColor Green
+        }
+        else
+        {
+            Write-Host "Folder already exists: $folderToCreate" -ForegroundColor Green
+        }
     }
 }
 function New-lv2pluginsfolder()
