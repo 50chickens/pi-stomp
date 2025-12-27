@@ -4,14 +4,14 @@
 greenText="\e[32m"
 redText="\e[31m"
 blueText="\e[34m"
-
-dtOverlay="iqaudio-codec"
+yellowText="\e[33m"
+#dtOverlay="iqaudio-codec"
 #dtOverLay="iqaudio-dacplus"
-#dtOverlay="hifiberry-dacplus"
+dtOverlay="hifiberry-dacplusadcpro"
 #dtOverlay="hifiberry-dac"
 #dtOverlay="audioinjector-wm8731"
 #dtOverlay="audioinjector-ultra"
-
+configTxtPath="/boot/firmware/config.txt"
 . ./configure-host-includes.sh
 echo "----------------------------------------"
 echo "Starting host configuration script..."
@@ -25,10 +25,10 @@ echo "Current user is $(whoami)"
 test_if_were_non_root_user
 test_we_can_sudo
 switch_to_correct_directory
-git_clone_or_pull_repos
+#git_clone_or_pull_repos
 # get VERSION_CODENAME and run PowerShell scripts
 echo -e "----------------------------------------"
-echo "${blueText}Getting OS configuration from /etc/os-release"
+echo -e "${blueText}Getting OS configuration from /etc/os-release"
 . /etc/os-release #get VERSION_CODENAME
 echo -e "${greenText}VERSION_CODENAME is ${VERSION_CODENAME}\e[0m"
 if ([ -z "${VERSION_CODENAME}" ]); then

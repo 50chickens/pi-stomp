@@ -14,7 +14,7 @@ function invoke-elevated-powershell()
     fi
     #get the exit code from pwsh from inside sudo -E
     echo "running $configure_host_elevated_script_filename with sudo -E pwsh..."
-    sudo -E pwsh -File "$configure_host_elevated_script_filename" -workingDirectory "$(pwd)" -dtOverlay $dtOverlay #all of the things that need sudo
+    sudo -E pwsh -File "$configure_host_elevated_script_filename" -workingDirectory "$(pwd)" -dtOverlay $dtOverlay -configTxtPath $configTxtPath #all of the things that need sudo
     # $? contains the exit code of the script run by sudo -E. print it out 
     local elevated_exit_code=$?
     echo "Elevated powershell script exited with code $elevated_exit_code"
@@ -23,22 +23,22 @@ function invoke-elevated-powershell()
     #test for exit code 1 from elevated script indicating reboot required. use switch case to avoid issues with set -e
     case $elevated_exit_code in
         1)
-            echo "** configure-host.sh: Reboot required after elevated configuration. Please reboot the system and re-run configure-host.sh to complete audio configuration. **"
+            echo -e "${greenText}configure-host.sh: Reboot required after elevated configuration. Please reboot the system and re-run configure-host.sh to complete audio configuration. **\e[0m"
             exit 0
             ;;
         2)
-            echo "** configure-host.sh: An error occurred during elevated configuration. Please check the output above. **"
+            echo -e "${redText}**Configure-host.sh: An error occurred during elevated configuration. Please check the output above. **\e[0m"
             exit 1
             ;;
         3) #no alsa device found but changes to config.txt already made.
-            echo "** configure-host.sh: No audio device found in ALSA but changes to config.txt already made. Please reboot the system and re-run configure-host.sh to complete audio configuration. **"
+            echo -e "${yellowText}Configure-host.sh: No audio device found in ALSA but changes to config.txt already made. Please reboot the system and re-run configure-host.sh to complete audio configuration. **\e[0m"
             exit 0
             ;;
         0)
-            echo "** configure-host.sh: Elevated configuration completed successfully. Continuing with audio configuration. **"
+            echo -e "${greenText}configure-host.sh: Elevated configuration completed successfully. Continuing with audio configuration. **\e[0m"
             ;;
         *)
-            echo "** configure-host.sh: An unexpected error occurred during elevated configuration. Please check the output above. **"
+            echo -e "${redText}**Configure-host.sh: An unexpected error occurred during elevated configuration. Please check the output above. **\e[0m"
             exit 1
             ;;
     esac
@@ -168,10 +168,10 @@ function install_dotnet() {
     rm dotnet-install.sh
     pwsh -Command 'Write-Host "dotnet version from pwsh: $(dotnet --version)"'
     if [ $? -ne 0 ]; then
-        echo -e "${redText} dotnet installation failed\e[0m"
+        echo -e "${redText}dotnet installation failed\e[0m"
         exit 1
     fi
-    echo -e "${greenText} dotnet installation succeeded.\e[0m"
+    echo -e "${greenText}dotnet installation succeeded.\e[0m"
 }
 
 disable_ipv6_on_boot()

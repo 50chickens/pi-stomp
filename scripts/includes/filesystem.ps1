@@ -1,28 +1,28 @@
-function New-Folders($folderToCreate)
+function New-Folder($folderToCreate)
 { 
     #create folder if it does not exist 
     if (-not (Test-Path -Path $folderToCreate -PathType Container))
     {
         New-Item -ItemType Directory -Path $folderToCreate | Out-Null
-        Write-Host "Created folder: $folderToCreate"
+        Write-Host "Created folder: $folderToCreate" -ForegroundColor Green
     }
     else
     {
-        Write-Host "Folder already exists: $folderToCreate"
+        Write-Host "Folder already exists: $folderToCreate" -ForegroundColor Green
     }
 }
 function New-lv2pluginsfolder()
 {
     if (Test-Path -Path "~/.lv2")
     {
-        Write-Host "~/.lv2 folder already exists"
+        Write-Host "~/.lv2 folder already exists" -ForegroundColor Yellow
         remove-item -Recurse -Force ~/.lv2
     }
     if (Test-Path -Path "~/data/.lv2")
     {
-        Write-Host "~/data/.lv2 folder already exists .Removing"
+        Write-Host "~/data/.lv2 folder already exists .Removing" -ForegroundColor Yellow
         remove-item -force ~/data/.lv2 #remove item won't remove symlinks where the target is missing.
     }
-    Write-Host "linking ~/data/.lv2 folder to ~/.lv2"
+    Write-Host "linking ~/data/.lv2 folder to ~/.lv2" -ForegroundColor Green
     ln -s ~/.lv2 ~/data/.lv2
 }

@@ -6,7 +6,7 @@ function Get-AudioDeviceConfigfromOverlayName
     )
     $audioDevices = @()
     $audioDevices += [PSCustomObject]@{alsaDeviceName="IQaudIOCODEC"; dtOverlay="iqaudio-codec";alsaStateFile="iqaudiocodec.state";}
-    $audioDevices += [PSCustomObject]@{alsaDeviceName="HiFiBerry DAC"; dtOverlay="hifiberry-dac";alsaStateFile="hifiberrydac.state";}
+    $audioDevices += [PSCustomObject]@{alsaDeviceName="HiFiBerry DAC"; dtOverlay="hifiberry-dacplusadcpro";alsaStateFile="hifiberrydac.state";}
     $audioDevices += [PSCustomObject]@{alsaDeviceName="AudioInjector WM8731"; dtOverlay="audioinjector-wm8731";alsaStateFile="audioinjectorwm8731.state";}
     write-host "Setting audio card in $configTxtPath to device name: $dtOverlay"
     $audioDevice = $audioDevices |? { $_.dtOverlay -ieq $dtOverlay  }
@@ -23,22 +23,26 @@ function Test-AudioDeviceExistsInAlsa($audioDeviceName)
     try {
         $alsactlOutput = & alsactl info 2>&1
     }
-    catch {
+    catch 
+    {
         Write-Host "Failed to run 'alsactl info': $_" -ForegroundColor Yellow
         return $false
     }
-    if (-not $alsactlOutput) {
+    if (-not $alsactlOutput) 
+    {
         Write-Host "'alsactl info' returned no output; cannot detect audio devices." -ForegroundColor Yellow
         return $false
     }
     $foundMatches = $alsactlOutput |? {$_ -imatch $audioDeviceName}
 
-    if ($foundMatches) {
+    if ($foundMatches) 
+    {
         write-host "Found matching audio device(s):"
         $foundMatches |% { write-host "  $_" }
         return $true
     }
-    else {
+    else 
+    {
         write-host "No matching audio device found for pattern '$audioDeviceName'"
     }
     return $false
@@ -96,7 +100,7 @@ function Disable-BuiltInAudio($configTxtPath)
     }
     Write-Host "Onboard audio overlay not found; adding line to disable onboard audio"
     Add-Content -Path $configTxtPath -Value $onboardAudioOverLayDisabled
-    $true
+    return $true
 }
 
 function Enable-AudioOverlay($dtOverLay, $configTxtPath)
@@ -144,13 +148,12 @@ function Install-AudioPackages($audioPackages)
     Invoke-PackageInstall -packageList $packagesToInstall
 }
 
-function Install-Audio($dtOverlay)
+function Install-Audio($configTxtPath, $dtOverlay)
 {
     $audioDevice = Get-AudioDeviceConfigfromOverlayName -dtOverLay $dtOverlay
     $rebootrequired = $false
-    $configTxtPath = "/boot/firmware/config.txt"
     write-host "----------------------------------------"
-    write-host "testing for existing iqaudio device in ALSA..."
+    write-host "testing for existing $($audioDevice.alsaDeviceName) device in ALSA..."
     $audioDeviceExists = Test-AudioDeviceExistsInAlsa -audioDeviceName $audioDevice.alsaDeviceName
     if ($audioDeviceExists) 
     {
