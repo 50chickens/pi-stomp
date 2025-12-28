@@ -1,5 +1,7 @@
 #!/bin/bash
+echo "Setting up Python virtual environment and installing required packages..."
 source ~/.env/bin/activate
+echo "Installing required Python packages..."
 # install latest available releases (no exact pins)
 pip3 install pyserial pystache aggdraw scandir backports.shutil-get-terminal-size
 pip3 install python-config
@@ -25,8 +27,3 @@ pip3 install pyalsaaudio python-rtmidi requests RPi.GPIO gfxhat matplotlib rpi_w
 
 
 #### only required for python 3.11 compatibility ####
-echo "Patching tornado for python 3.11"
-cp ~/.env/lib/python3.11/site-packages/tornado/httputil.py ~/.env/lib/python3.11/site-packages/tornado/httputil.py.bak
-sed -i -e 's/collections.MutableMapping/collections.abc.MutableMapping/' ~/.env/lib/python3.11/site-packages/tornado/httputil.py
-sed -i -e 's/collections.MutableMapping/collections.abc.MutableMapping/' ~/modui-env/lib/python3.11/site-packages/tornado/httputil.py
-sed -i -e 's/collections.Mapping/collections.abc.Mapping/' ~/.env/lib/python3.11/site-packages/browsepy/manager.py

@@ -17,81 +17,101 @@
 
 function Invoke-CompileJack()
 {
-    pushd $(mktemp -d) && git clone https://github.com/micahvdm/jack2.git
+    $tmpDir = $(mktemp -d)
+    Write-host "Cloning jack2 into temporary folder $tmpDir"
+    pushd $tmpDir && git clone https://github.com/micahvdm/jack2.git
     pushd jack2
+    write-host "running jack2 configure."
     ./waf configure
+    write-host "building and installing jack2."
     ./waf build
-    sudo ./waf install
+    ./waf install
     popd
     popd
 }
 function Invoke-ModSetup()
 {
-# #Mod-host
-    pushd $(mktemp -d) && git clone https://github.com/micahvdm/mod-host.git
+    $tmpDir = $(mktemp -d)
+    Write-host "Cloning mod-host into temporary folder $tmpDir"
+    pushd $tmpDir && git clone https://github.com/micahvdm/mod-host.git
     pushd mod-host
+    write-host "building and installing mod-host"
     make
-    sudo make install
+    write-host "running mod-host make install"
+    make install
     popd
     popd
 }
 
 function Invoke-ModUI()
 {
-
-    pushd $(mktemp -d) && git clone https://github.com/micahvdm/mod-ui.git
+    $tmpDir = $(mktemp -d)
+    Write-host "Cloning mod-ui into temporary folder $tmpDir"
+    pushd $tmpDir && git clone https://github.com/micahvdm/mod-ui.git
     pushd mod-ui
+    write-host "Setting up mod-ui"
     chmod +x setup.py
     cd utils
     make
     cd ..
-    sudo ./setup.py install
-    cp -r default.pedalboard /home/pistomp/data/.pedalboards
+    ./setup.py install
     popd
     popd
 }
 
-function New-PedalboardDefaultFiles()
-{
-    if (Test-Path -Path "~/.pedalboards" -PathType Leaf)
-    {
-        rm -rf ~/.pedalboards
-    }
-    ln -s ~/data/.pedalboards ~/.pedalboards
-    
-}
-
-function Invoke-InstallMod()
+function Invoke-CompileSoftware()
 {
     Invoke-CompileJack
     Invoke-ModSetup
     Invoke-ModUI
-    New-ModSystemDServices
-    Invoke-JackConfiguration
-    New-PedalboardDefaultFiles
 }
-function New-ModSystemDServices()
+function New-AudioSystemDService($audioServicesUnitFile) 
 {
-    sudo cp setup/mod/*.service /usr/lib/systemd/system/
-    sudo ln -sf /usr/lib/systemd/system/browsepy.service /etc/systemd/system/multi-user.target.wants
-    sudo ln -sf /usr/lib/systemd/system/jack.service /etc/systemd/system/multi-user.target.wants
-    sudo ln -sf /usr/lib/systemd/system/mod-host.service /etc/systemd/system/multi-user.target.wants
-    sudo ln -sf /usr/lib/systemd/system/mod-ui.service /etc/systemd/system/multi-user.target.wants
+    $systemDFolder = "/usr/lib/systemd/system"
+    $audioServicesUnitFile = $_
+    $audioServiceName = [System.IO.Path]::GetFileNameWithoutExtension($audioServicesUnitFile.Name) #eg - mod-host
+    $audioServiceUnitFileName = $audioServicesUnitFile.Name #eg - mod-host.service
+    $targetServiceFileName = "$systemDFolder/$audioServiceUnitFileName" #eg /usr/lib/systemd/system/mod-host.service
+    Write-Host "Processing audio service: $audioServiceName"
+    write-host "Audio service unit file name: $audioServiceUnitFileName"
+    write-host "Target service file name: $targetServiceFileName"
+    
+    if (Test-Path -Path "$targetServiceFileName")
+    {
+        Write-Host "Removing existing service file: $targetServiceFileName" -ForegroundColor Yellow
+        Remove-Item -Path "$targetServiceFileName" -Force
+    }
+    Write-Host "Copying service file: $($audioServicesUnitFile.FullName) to $systemDFolder"    
+    copy-item $audioServicesUnitFile -Destination "$systemDFolder/$audioServiceUnitFileName"
+    Write-Host "Creating symlink for $audioServiceName in /etc/systemd/system/multi-user.target.wants/"
 
+    ln -sf $targetServiceFileName /etc/systemd/system/multi-user.target.wants/
+}
+function New-AudioSystemDServices($audioServicesUnitFileFolder)
+{
+    write-host "Audio services unit file folder: $audioServicesUnitFileFolder"
+    $audioServicesUnitFiles = get-childitem -path $audioServicesUnitFileFolder -filter *.service
+    if (-not $audioServicesUnitFiles) {
+        write-host "No audio service unit files found in $audioServicesUnitFileFolder" -ForegroundColor Yellow
+        return
+    }
+    $audioServicesUnitFiles |%{
+        New-AudioSystemDService -audioServicesUnitFile $_
+        }
 }
 
-function Invoke-JackConfiguration()
+function Start-AudioSystemDService($audioService)
 {
-    pushd setup/mod
-    sudo adduser --no-create-home --system --group jack
-    sudo adduser pistomp jack --quiet
-    sudo adduser root jack --quiet
-    sudo adduser jack audio --quiet
-    sudo cp jackdrc /etc/
-    sudo chmod +x /etc/jackdrc
-    sudo chown jack:jack /etc/jackdrc
-    sudo cp 80 /etc/authbind/byport/
-    sudo chmod 500 /etc/authbind/byport/80
-    sudo chown pistomp:pistomp /etc/authbind/byport/80
-    popd
+    Write-Host "Enabling and starting audio service: $audioService"
+    systemctl enable $audioService
+    systemctl start $audioService
+    systemctl status $audioService --no-pager
+}
+function Start-AudioSystemDServices($audioServices)
+{
+    systemctl daemon-reload
+    $audioServices |%{
+        $audioService = $_
+        Start-AudioSystemDService -audioService $audioService
+    }
 }

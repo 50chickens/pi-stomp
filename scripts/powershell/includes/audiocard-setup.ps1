@@ -191,3 +191,32 @@ function Install-Audio($configTxtPath, $dtOverlay)
         exit 1
     }
 }
+
+function Invoke-JackConfiguration($user, $jackUser, $jackFolder)
+{
+    write-host "Configuring JACK settings for user $user and jack user $jackUser. Jack folder: $jackFolder"
+    # Copy and configure jackdrc
+    if (Test-Path "/etc/jackdrc")
+    {
+        write-Host "Removing existing /etc/jackdrc"
+        rm -f /etc/jackdrc
+    } 
+    Write-Host "Copying jackdrc to /etc/"
+    cp "$jackFolder/jackdrc" /etc/
+    chmod +x /etc/jackdrc
+    $chown = @($jackUser,$jackUser) -join ":"
+    Write-Host "Setting ownership of /etc/jackdrc to $chown"
+    chown $chown /etc/jackdrc
+
+    if (Test-Path "/etc/authbind/byport/80")
+    {
+        write-Host "Removing existing /etc/authbind/byport/80"
+        rm -f /etc/authbind/byport/80
+    }
+    Write-Host "Copying authbind configuration for port 80"
+    cp "$jackFolder/80" /etc/authbind/byport/
+    chmod 500 /etc/authbind/byport/80
+    Write-Host "Setting ownership of /etc/authbind/byport/80 to $user"
+    $chown = @($user,$user) -join ":"
+    chown $chown /etc/authbind/byport/80
+}

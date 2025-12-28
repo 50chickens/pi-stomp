@@ -14,7 +14,7 @@ function invoke-elevated-powershell()
     fi
     #get the exit code from pwsh from inside sudo -E
     echo "running $configure_host_powershell_script_filename with sudo -E pwsh..."
-    sudo -E pwsh -File "$configure_host_powershell_script_filename" -BaseDirectory $base_powershell_directory -dtOverlay $dtOverlay -configTxtPath $configTxtPath #all of the things that need sudo
+    sudo -E pwsh -File "$configure_host_powershell_script_filename" -dtOverlay $dtOverlay -alsaStateFile $alsaStateFile -configTxtPath $configTxtPath  #all of the things that need sudo
     # $? contains the exit code of the script run by sudo -E. print it out 
     local elevated_exit_code=$?
     echo "Elevated powershell script exited with code $elevated_exit_code"
