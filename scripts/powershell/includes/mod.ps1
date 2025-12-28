@@ -59,21 +59,21 @@ function Invoke-ModUI()
     popd
 }
 
-function Invoke-CompileSoftware()
+function Invoke-InstallAudioSoftware()
 {
     Invoke-CompileJack
     Invoke-ModSetup
     Invoke-ModUI
 }
-function New-AudioSystemDService($audioServicesUnitFile) 
+function New-SystemDService($servicesUnitFile) 
 {
     $systemDFolder = "/usr/lib/systemd/system"
-    $audioServicesUnitFile = $_
-    $audioServiceName = [System.IO.Path]::GetFileNameWithoutExtension($audioServicesUnitFile.Name) #eg - mod-host
-    $audioServiceUnitFileName = $audioServicesUnitFile.Name #eg - mod-host.service
-    $targetServiceFileName = "$systemDFolder/$audioServiceUnitFileName" #eg /usr/lib/systemd/system/mod-host.service
-    Write-Host "Processing audio service: $audioServiceName"
-    write-host "Audio service unit file name: $audioServiceUnitFileName"
+    $servicesUnitFile = $_
+    $serviceName = [System.IO.Path]::GetFileNameWithoutExtension($servicesUnitFile.Name) #eg - mod-host
+    $serviceUnitFileName = $servicesUnitFile.Name #eg - mod-host.service
+    $targetServiceFileName = "$systemDFolder/$serviceUnitFileName" #eg /usr/lib/systemd/system/mod-host.service
+    Write-Host "Processing service: $serviceName"
+    write-host "service unit file name: $audioServiceUnitFileName"
     write-host "Target service file name: $targetServiceFileName"
     
     if (Test-Path -Path "$targetServiceFileName")
@@ -81,37 +81,37 @@ function New-AudioSystemDService($audioServicesUnitFile)
         Write-Host "Removing existing service file: $targetServiceFileName" -ForegroundColor Yellow
         Remove-Item -Path "$targetServiceFileName" -Force
     }
-    Write-Host "Copying service file: $($audioServicesUnitFile.FullName) to $systemDFolder"    
-    copy-item $audioServicesUnitFile -Destination "$systemDFolder/$audioServiceUnitFileName"
-    Write-Host "Creating symlink for $audioServiceName in /etc/systemd/system/multi-user.target.wants/"
+    Write-Host "Copying service file: $($servicesUnitFile.FullName) to $systemDFolder"    
+    copy-item $servicesUnitFile -Destination "$systemDFolder/$serviceUnitFileName"
+    Write-Host "Creating symlink for $serviceName in /etc/systemd/system/multi-user.target.wants/"
 
     ln -sf $targetServiceFileName /etc/systemd/system/multi-user.target.wants/
 }
-function New-AudioSystemDServices($audioServicesUnitFileFolder)
+function New-AudioSystemDServices($servicesUnitFileFolder)
 {
-    write-host "Audio services unit file folder: $audioServicesUnitFileFolder"
-    $audioServicesUnitFiles = get-childitem -path $audioServicesUnitFileFolder -filter *.service
-    if (-not $audioServicesUnitFiles) {
-        write-host "No audio service unit files found in $audioServicesUnitFileFolder" -ForegroundColor Yellow
+    write-host "services unit file folder: $servicesUnitFileFolder"
+    $servicesUnitFiles = get-childitem -path $servicesUnitFileFolder -filter *.service
+    if (-not $servicesUnitFiles) {
+        write-host "No service unit files found in $servicesUnitFileFolder" -ForegroundColor Yellow
         return
     }
-    $audioServicesUnitFiles |%{
-        New-AudioSystemDService -audioServicesUnitFile $_
+    $servicesUnitFiles |%{
+        New-SystemDService -ServicesUnitFile $_
         }
 }
 
-function Start-AudioSystemDService($audioService)
+function Start-SystemDService($service)
 {
-    Write-Host "Enabling and starting audio service: $audioService"
-    systemctl enable $audioService
-    systemctl start $audioService
-    systemctl status $audioService --no-pager
+    Write-Host "Enabling and starting service: $service"
+    systemctl enable $service
+    systemctl start $service
+    systemctl status $service --no-pager
 }
-function Start-AudioSystemDServices($audioServices)
+function Start-SystemDServices($services)
 {
     systemctl daemon-reload
-    $audioServices |%{
-        $audioService = $_
-        Start-AudioSystemDService -audioService $audioService
+    $services |%{
+        $service = $_
+        Start-SystemDService -service $service
     }
 }

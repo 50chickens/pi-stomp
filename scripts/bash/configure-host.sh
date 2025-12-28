@@ -25,4 +25,6 @@ install_dotnet
 echo -e "----------------------------------------"
 disable_ipv6_on_boot
 echo -e "----------------------------------------"
+check_and_disable_pistomp_services
+echo -e "----------------------------------------"
 echo -e "${greenText}Completed elevated configuration tasks.\e[0m"

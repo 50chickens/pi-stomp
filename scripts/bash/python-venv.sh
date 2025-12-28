@@ -11,6 +11,7 @@ pip3 install tornado
 pip3 install Pillow
 pip3 install cython
 pip3 install browsepy
+pip3 install mod
 pip3 install pyalsaaudio python-rtmidi requests RPi.GPIO gfxhat matplotlib rpi_ws281x adafruit-circuitpython-neopixel adafruit-circuitpython-rgb-display numpy adafruit-circuitpython-mcp3xxx
 
 # pushd $(mktemp -d) && git clone https://github.com/micahvdm/browsepy.git

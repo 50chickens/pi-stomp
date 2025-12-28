@@ -10,6 +10,7 @@ Write-host "  dtOverlay: $dtOverlay"
 write-host "  alsaStateFile: $alsaStateFile"
 Write-host "  configTxtPath: $configTxtPath"
 
+$enableMidi = $false
 $user = "pistomp"
 $group = "jack"
 $jackUser = "jack"
@@ -17,6 +18,7 @@ $setupfolder = "../../setup"
 $jackFolder = "$setupfolder/mod"
 $alsaStateFilePath = "$setupfolder/audio/$($alsaStateFile).state"
 $audioServicesUnitFileFolder = "$setupfolder/AudioServices"
+$midiServicesUnitFileFolder = "$setupfolder/MidiServices"
 $servicesToDisable = @("bluetooth","dnsmasq","exim4")
 $cockPitPackages = @("cockpit","cockpit-packagekit","cockpit-storaged","cockpit-networkmanager")
 
@@ -25,7 +27,7 @@ $otherPackages = @("liblilv-dev","lv2-dev","libserd-dev","libsord-dev","libsrato
 $optionalPackages = @("virtualenv", "python3-venv", "python3-pip", "python3-dev", "python3-all", "python3-setuptools", "python3-zeroconf", "python3-smbus", "python3-liblo", "build-essential", "pkg-config", "cmake", "debhelper", "dh-autoreconf", "dh-python", "gperf", "intltool", "make", "libasound2-dev", "libjack-jackd2-dev", "libpulse-dev", "liblilv-dev", "libserd-dev", "libsord-dev", "libsratom-dev", "lilv-utils", "liblilv-0-0", "lv2-dev", "libfreetype6-dev", "libjpeg-dev", "libpng-dev", "libtiff5-dev", "zlib1g-dev", "libpng-dev", "libtiff5-dev", "libreadline-dev", "libssl-dev", "libffi-dev", "libarmadillo-dev", "libavahi-gobject-dev", "libavcodec-dev", "libavutil-dev", "libbluetooth-dev", "libboost-dev", "libeigen3-dev", "libfftw3-dev", "libglib2.0-dev", "libglibmm-2.4-dev", "libgtk2.0-dev", "libgtkmm-2.4-dev", "liblrdf0-dev", "libsamplerate0-dev", "libsigc++-2.0-dev", "libsndfile1-dev", "libzita-convolver-dev", "libzita-resampler-dev", "libzita-alsa-pcmi-dev", "zita-alsa-pcmi-utils", "libfluidsynth-dev", "librtmidi-dev", "ladspa-sdk", "liblo-dev", "p7zip-full", "authbind", "hostapd", "dnsmasq", "iptables", "lockfile-progs", "tree", "bc", "bison", "flex", "git", "curl")
 
 $audioServicesToInstall = @("browsepy","jack","mod-host","mod-ui")
-
+$midiServicesToStart = @("mod-amidithru","mod-touchosc2midi","mod-midi-merger","mod-midi-merger-broadcaster")
 $sudoFoldersToCreate = @("/usr/mod/scripts")
 
 #get the folder where the powershell script is not the bash script. 
@@ -112,16 +114,28 @@ Write-Host "----------------------------------------"
 Write-Host "Creating audio configuration..."
 Invoke-AudioUserAndGroupConfiguration -group $group -user $user -jackUser $jackUser
 Write-Host "----------------------------------------"
-Write-Host "applying JACK configuration..."
+Write-Host "Applying JACK configuration..."
 Invoke-JackConfiguration -user $user -jackUser $jackUser -jackFolder $jackFolder
 Write-Host "----------------------------------------"
-write-host "Compiling and installing MOD software..."
-Invoke-CompileSoftware
+write-host "Installing audio software..."
+Invoke-InstallAudioSoftware
 Write-Host "----------------------------------------"
 write-host "Creating audio systemd services..."
 New-AudioSystemDServices -audioServicesUnitFileFolder $audioServicesUnitFileFolder
 Write-Host "----------------------------------------"
 Write-Host "Enabling and starting audio systemd services..."
-Start-AudioSystemDServices -audioServices $audioServicesToInstall
+#Start-SystemDServices -Services $audioServicesToInstall
 Write-Host "----------------------------------------"
+if ($enableMidi)
+{
+    write-host "Installing MIDI components..."
+    Invoke-InstallMidi
+    Write-Host "----------------------------------------"
+    write-host "Creating MIDI systemd services..."
+    New-AudioSystemDServices -servicesUnitFileFolder $midiServicesUnitFileFolder
+    Write-Host "----------------------------------------"
+    Write-Host "Enabling and starting MIDI systemd services..."
+    Start-SystemDServices -Services $midiServicesToStart
+    Write-Host "----------------------------------------"
+}
 write-host "Elevated OS configuration complete"

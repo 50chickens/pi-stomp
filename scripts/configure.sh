@@ -66,9 +66,9 @@ git_clone_or_pull_repos
 echo -e "----------------------------------------"
 dot_source_os_release_file # get VERSION_CODENAME and run PowerShell scripts
 echo -e "----------------------------------------"
-#run_configure_host_sudo_script #run this script as sudo to do OS configuration tasks that need root.
+run_configure_host_sudo_script #run this script as sudo to do OS configuration tasks that need root.
 echo -e "----------------------------------------"
-#invoke-elevated-powershell
+invoke-elevated-powershell
 echo -e "----------------------------------------"
 echo "running audio installation powershell scripts..."
 pwsh -File "$configure_pistomp_powershell_script_filename" -dtOverlay $dtOverlay

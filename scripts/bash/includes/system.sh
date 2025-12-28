@@ -185,3 +185,21 @@ disable_ipv6_on_boot()
     echo "ipv6.disable=1" >> /boot/cmdline.txt #only takes effect on next boot
     echo -e "${greenText}IPv6 disabled on boot. changes will take effect on next reboot.\e[0m"
 }
+
+check_and_disable_pistomp_services()
+{
+    echo -e "${blueText}Disabling Pi-Stomp audio services...\e[0m"
+
+    local services_to_disable=("browsepy" "jack" "mod-host" "mod-ui" "mod-amidithru" "mod-touchosc2midi" "mod-midi-merger" "mod-midi-merger-broadcaster")
+    for service in "${services_to_disable[@]}"; do
+    #check for the service first.
+    if ! systemctl list-units --full -all | grep -Fq "$service.service"; then
+        echo "Service $service not found, skipping."
+        continue
+    fi
+        echo "Disabling and stopping service: $service"
+        systemctl disable "$service"
+        systemctl stop "$service"
+    done
+    echo -e "${greenText}Pi-Stomp audio services disabled.\e[0m"
+}
