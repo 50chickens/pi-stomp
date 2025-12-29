@@ -8,7 +8,7 @@ Requires=browsepy.service
 [Service]
 LimitRTPRIO=95
 LimitMEMLOCK=infinity
-Environment=LV2_PATH=%h/.mod/lv2:/usr/lib/lv2:/usr/local/lib/lv2
+Environment=LV2_PATH=%h/.mod/lv2
 Environment=MOD_DATA_DIR=%h/.mod
 Environment=MOD_USER_PEDALBOARDS_DIR=%h/.mod/pedalboards
 Environment=MOD_USER_FILES_DIR=%h/.mod/user-files
