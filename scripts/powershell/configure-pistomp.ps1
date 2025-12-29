@@ -33,14 +33,6 @@ foreach ($param in $parametersToValidate)
     Test-ScriptParametersAreValid -paramValue $param.Value -paramName $param.Name
 }
 
-function New-DataFolders($foldersToCreate, $userFoldersToCreate)
-{
-    New-Folders -foldersToCreate $foldersToCreate
-}
-
-
-#$foldersToCreate = @("data/.pedalboards", "data/user-files", ".lv2")
-
 $modFolder = ".mod"
 $lv2Folder = "$($modFolder)/.lv2"
 $modDataFolder = "$modFolder/data"
@@ -73,7 +65,7 @@ write-host "getting OS release information..."
 Get-OSRelease #sets global variables from /etc/os-release
 Write-Host "----------------------------------------"
 write-host "creating data folders..." 
-New-DataFolders -foldersToCreate $foldersToCreate
+New-Folders -foldersToCreate $foldersToCreate -baseFolder $HOME
 Write-Host "----------------------------------------"
 Write-Host "Checking out required repos..."
 Invoke-CheckoutGitRepos -repos $repos

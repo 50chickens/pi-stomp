@@ -32,13 +32,14 @@ function Invoke-CheckoutGitRepos($repos)
 function Invoke-GitPull($targetFolder)
 {
     Write-Host "Target folder $targetFolder already exists; Doing git pull from $($repo.Branch) branch." -ForegroundColor Yellow
-    pushd $targetFolder
+    Push-Location $targetFolder
     #test if there are local changes. if so, print warning and skip git pull.
     $localChanges = git status --porcelain
+    write-host "Local changes: $localChanges"
     if ($localChanges) 
     {
         Write-Host "Warning: Local changes detected in $targetFolder; skipping git pull to avoid merge conflicts." -ForegroundColor Yellow
-        popd
+        Pop-Location
         return
     }
     git checkout $branch
@@ -49,5 +50,5 @@ function Invoke-GitPull($targetFolder)
     {
         Write-Host "Warning: git pull in $targetFolder exited with code $gitLastExitCode" -ForegroundColor Yellow
     }   
-    popd
+    Pop-Location
 }
