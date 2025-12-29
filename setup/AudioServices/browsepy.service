@@ -2,12 +2,11 @@
 Description=browsepy
 
 [Service]
-Environment=LV2_PATH=/home/pistomp/.mod/.lv2:/usr/lib/lv2:/usr/local/lib/lv2
 Environment=BROWSEPY_HOST=0.0.0.0
 Environment=BROWSEPY_PORT=8081
 
-WorkingDirectory=/home/pistomp/.env/bin
-ExecStart=/home/pistomp/.env/bin/browsepy 0.0.0.0 8081 --directory /home/pistomp/.mod --upload /home/pistomp/.mod --removable /home/pistomp/.mod
+WorkingDirectory=/home/pistomp/data/user-files/
+ExecStart=/home/pistomp/.env/bin/browsepy 0.0.0.0 8081 --directory /home/pistomp/data/user-files --upload /home/pistomp/data/user-files --removable /home/pistomp/data/user-files
 User=pistomp
 Group=pistomp
 Restart=always

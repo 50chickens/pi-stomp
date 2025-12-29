@@ -12,37 +12,45 @@ function Get-OSRelease()
 }
 function Invoke-AudioUserAndGroupConfiguration($group, $user, $jackUser)
 {
-    write-host "Configuring audio users and groups for user $user, group $group, jack user $jackUser"
+    
     # Create jack user and group if they don't exist
-    if ($null -eq (getent group $jackUser)) 
+    $jackGroupExists = getent group $jackUser
+    $jackUserExists = getent passwd $jackUser
+     
+    if (-not $jackUserExists)
     {
-        Write-Host "Creating system group: jack"
-        groupadd --system $jackUser
+        Write-Host "Creating system user and group: $jackUser"
+        adduser --no-create-home --system --group $jackUser
     }
-    if ($null -eq (getent passwd $jackUser)) 
+    if (-not $jackGroupExists)
     {
-        Write-Host "Creating system user: $jackUser"
-        adduser --no-create-home --system --group jack $jackUser
+        Write-Host "Creating system user and group: $jackUser"
+        adduser --no-create-home --system --group $jackUser
     }
-
+    else
+    {
+        Write-Host "User and group $jackUser already exists."
+    }
+    
     $groupsToAdd = @(
-        @{ User = "$user"; Group = $jackUser },
+        @{ User = "$user"; Group = "$jackUser" },
         @{ User = "$user"; Group = "audio" },
-        @{ User = "root"; Group = $jackUser },
-        @{ User = $jackUser; Group = "audio" }
+        @{ User = "root"; Group = "$jackUser" },
+        @{ User = "$jackUser"; Group = "audio" }
     )
-
-    foreach ($groupAdd in $groupsToAdd) 
+    
+    foreach ($groupAdd in $groupsToAdd)
     {
-        $isInGroup = id -nG $($groupAdd.User) | grep -qw $($groupAdd.Group)
-        if (-not $isInGroup) 
-        {
-            Write-Host "Adding user $($groupAdd.User) to group $($groupAdd.Group)"
-            usermod -aG $($groupAdd.Group) $($groupAdd.User)
-        } 
-        else 
+        $userGroups = id -nG $($groupAdd.User)
+        
+        if ($userGroups -match "\b$($groupAdd.Group)\b")
         {
             Write-Host "User $($groupAdd.User) is already in group $($groupAdd.Group)"
+        }
+        else
+        {
+            Write-Host "Adding user $($groupAdd.User) to group $($groupAdd.Group)"
+            adduser $($groupAdd.User) $($groupAdd.Group) --quiet
         }
     }
 }

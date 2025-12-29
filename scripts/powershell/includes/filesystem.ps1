@@ -36,9 +36,25 @@ function New-LinkedFolder($folderName)
     Write-Host "linking ~/data/$folderName folder to ~/$folderName" -ForegroundColor Green
     ln -s ~/$folderName ~/data/$folderName
 }
+function New-Symlink($linkFromPath, $linkToPath)
+{
+    if (Test-Path -Path $linkFromPath)
+    {
+        Write-Host "$linkFromPath already exists. Removing" -ForegroundColor Yellow
+        remove-item -force $linkFromPath
+    }
+    Write-Host "Creating symlink: $linkFromPath -> $linkToPath" -ForegroundColor Green
+    ln -s $linkToPath $linkFromPath
+}
 function New-LinkedFolders($linkedFolders)
 {
     $linkedFolders |%{
         New-LinkedFolder -folderName $_
     }
+}
+
+function New-LinkedFolders()
+{
+    ln -s /home/pistomp/data/.pedalboards /home/pistomp/.pedalboards
+    ln -s /home/pistomp/.lv2 /home/pistomp/data/.lv2    
 }

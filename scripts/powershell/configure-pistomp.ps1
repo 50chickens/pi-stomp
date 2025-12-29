@@ -1,7 +1,7 @@
 param (
     [string] $dtOverlay
     )   
-
+$ErrorActionPreference = "Stop" #stop on all errors
 $expectedDirectory = $MyInvocation.MyCommand.Definition | Split-Path -Parent
 write-host "Current script path: $expectedDirectory"
 push-location $expectedDirectory
@@ -36,11 +36,28 @@ $baseGithubOrganization = "TreeFallSound"
 $baseFolder = $HOME
 write-host "Base folder: $baseFolder"
 $modFolder = "$($baseFolder)/.mod"
-$lv2Folder = "$($modFolder)/.lv2"
-$modDataFolder = "$modFolder/data"
-$userFilesDirectory = "$modDataFolder/user-files"
-$pedalBoardsDirectory = "$modFolder/pedalboards"
-$foldersToCreate = @($modFolder, $lv2Folder, $modDataFolder, $userFilesDirectory, $pedalBoardsDirectory)
+$lv2Folder = "$($baseFolder)/.lv2"
+$dataFolder = "$baseFolder/data"
+$userFilesDirectory = "$dataFolder/user-files"
+$pedalBoardsDirectory = "$dataFolder/.pedalboards"
+$foldersToCreate = @($lv2Folder, $dataFolder)
+$userFilesSubfolders = @(
+    "Speaker Cabinets IRs",
+    "Reverb IRs",
+    "Audio Loops",
+    "Audio Recordings",
+    "Audio Samples",
+    "Audio Tracks",
+    "MIDI Clips",
+    "MIDI Songs",
+    "Hydrogen Drumkits",
+    "SF2 Instruments",
+    "SFZ Instruments",
+    "Amplifier Profiles",
+    "Aida DSP Models",
+    "NAM Models",
+    "Captures"
+)
 $linkedFolders = @() #empty as we don't need any linked folders for pi-stomp currently.
 write-host "Mod folder: $modFolder"
 write-host "LV2 folder: $lv2Folder"
@@ -51,7 +68,6 @@ write-host "Pedalboards directory: $pedalBoardsDirectory"
 $repos = @()
 $repos += [PSCustomObject]@{RepoURL = "https://github.com/$baseGithubOrganization/pi-stomp-pedalboards.git";CheckOutFolder=$pedalBoardsDirectory}
 $repos += [PSCustomObject]@{RepoURL = "https://github.com/$baseGithubOrganization/pi-stomp-user-files.git";CheckOutFolder=$userFilesDirectory} 
-
 $pythonPackageInstallationScript = "../bash/python-venv.sh"
 Write-Host "----------------------------------------"
 write-host "testing that we're in the expected directory..." 
@@ -67,13 +83,11 @@ write-host "getting python version..."
 $pythonVersion = Get-PythonVersion #for python version we only need the major.minor part, eg 3.11. use regex to get named group for major.minor
 Write-Host "----------------------------------------"
 write-host "creating data folders..." 
-New-Folders -foldersToCreate $foldersToCreate
+#New-Folders -foldersToCreate $foldersToCreate
+#New-LinkedFolders
 Write-Host "----------------------------------------"
 Write-Host "Checking out required repos..."
-Invoke-CheckoutGitRepos -repos $repos
-Write-Host "----------------------------------------"
-Write-Host "creating linked folders"
-New-LinkedFolders -linkedFolders $linkedFolders
+#Invoke-CheckoutGitRepos -repos $repos
 Write-Host "----------------------------------------"
 Write-Host "creating new python environment."
 New-EmptyPythonVenv -venvPath "$($HOME)/.env"
@@ -84,4 +98,7 @@ Invoke-InstallPythonPackages -pythonPackageInstallationScript $pythonPackageInst
 Write-Host "----------------------------------------"
 Write-Host "patching python files for compatibility..."
 Invoke-PatchPythonFiles -pythonVersion $pythonVersion -venvPath "$($HOME)/.env"
+Write-Host "----------------------------------------"
+Write-Host "cleaning up pedalboards directory..."
+Remove-NonBundleFilesFromPedalboards -PedalboardsDirectory $pedalBoardsDirectory
 Write-Host "----------------------------------------"

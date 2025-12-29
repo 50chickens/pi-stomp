@@ -1,14 +1,14 @@
-function invoke-audioservice_powershell_script() 
+function invoke-configure-audioservices_powershell_script() 
 {
-    echo "running $configure_audioservice_powershell_script_filename with sudo -E pwsh..."
-    sudo -E pwsh -File "$configure_audioservice_powershell_script_filename" -alsaStateFile $alsaStateFile
+    echo "running $configure_audioservices_powershell_script_filename with sudo -E pwsh..."
+    sudo -E pwsh -File "$configure_audioservices_powershell_script_filename" -alsaStateFile $alsaStateFile
     if [ $? -ne 0 ]; then
         echo -e "${redText}Audio service configuration script failed\e[0m"
         exit 1
     fi
     echo -e "${greenText}Audio service configuration script completed successfully.\e[0m"
 }
-function invoke-host_configuration_powershell_script() 
+function invoke-configure-host_powershell_script() 
 {
     #print out the value of ELEVATED_EXIT_CODE if we found it.
     echo "checking for environment variables from previous runs."

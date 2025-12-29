@@ -13,7 +13,7 @@ $group = "jack"
 $jackUser = "jack"
 $setupfolder = "../../setup"
 $jackFolder = "$setupfolder/mod"
-$servicesToDisable = @("bluetooth","dnsmasq","exim4")
+$servicesToDisable = @("bluetooth","dnsmasq","exim4","fluidsynth")
 
 $cockPitPackages = @("cockpit","cockpit-packagekit","cockpit-storaged","cockpit-networkmanager")
 $mainPackages = @("virtualenv","python3-pip","python3-dev","python3-zeroconf","build-essential","libasound2-dev","libjack-jackd2-dev","liblilv-dev","libjpeg-dev","zlib1g-dev","cmake","debhelper","dh-autoreconf","dh-python","gperf","intltool","ladspa-sdk","libarmadillo-dev","libavahi-gobject-dev","libavcodec-dev","libavutil-dev","libbluetooth-dev","libboost-dev","libeigen3-dev","libfftw3-dev","libglib2.0-dev","libglibmm-2.4-dev","libgtk2.0-dev","libgtkmm-2.4-dev","liblrdf0-dev","libsamplerate0-dev","libsigc++-2.0-dev","libsndfile1-dev","libzita-convolver-dev","libzita-resampler-dev","lv2-dev","p7zip-full","python3-all","python3-setuptools","libreadline-dev","zita-alsa-pcmi-utils","hostapd","dnsmasq","iptables","python3-smbus","liblo-dev","python3-liblo","libzita-alsa-pcmi-dev","authbind","libfluidsynth-dev","lockfile-progs","tree")
@@ -40,8 +40,8 @@ if (-not $includefiles) {
     write-host "No include files found in $includesFolder" -ForegroundColor Yellow
     exit 1
 }
-get-childitem -path $includesFolder -recurse -filter *.ps1 |% { 
-    Write-Verbose "dot Sourcing $($_.FullName)"
+$includefiles |% { 
+    Write-verbose "dot Sourcing $($_.FullName)"
     . $_.FullName 
 }
 
@@ -65,36 +65,36 @@ Write-Host "----------------------------------------"
 Get-OSRelease #sets global variables from /etc/os-release
 Write-Host "----------------------------------------"
 write-host "Configuring audio settings..." 
-Install-Audio -dtOverlay $dtOverlay -configTxtPath $configTxtPath
+#Install-Audio -dtOverlay $dtOverlay -configTxtPath $configTxtPath
 Write-Host "----------------------------------------"
 write-host "Installing cockpit packages..." 
-Invoke-PackageInstall -packagestoBeInstalled $cockPitPackages
+#Invoke-PackageInstall -packagestoBeInstalled $cockPitPackages
 Write-Host "----------------------------------------"
 write-host "Installing main packages..." 
-Invoke-PackageInstall -packagestoBeInstalled $mainPackages
+#Invoke-PackageInstall -packagestoBeInstalled $mainPackages
 Write-Host "----------------------------------------"
 write-host "Installing other packages..." 
-Invoke-PackageInstall -packagestoBeInstalled $otherPackages
+#Invoke-PackageInstall -packagestoBeInstalled $otherPackages
 Write-Host "----------------------------------------"
 if ($installOptionalPackages)
 {
     Write-Host "Installing optional packages..." -ForegroundColor Green
-    Invoke-PackageInstall -packagestoBeInstalled $optionalPackages
+ #   Invoke-PackageInstall -packagestoBeInstalled $optionalPackages
     Write-Host "----------------------------------------"
 }
 write-host "Disabling unused services..."
 Disable-Services -servicesToDisable $servicesToDisable
 Write-Host "----------------------------------------"
 Write-Host "creating sudo folders..."
-New-Folders -FoldersToCreate $sudoFoldersToCreate
+#New-Folders -FoldersToCreate $sudoFoldersToCreate
 Write-Host "----------------------------------------"
 Write-Host "Creating audio configuration..."
-Invoke-AudioUserAndGroupConfiguration -group $group -user $user -jackUser $jackUser
+#Invoke-AudioUserAndGroupConfiguration -group $group -user $user -jackUser $jackUser
 Write-Host "----------------------------------------"
 Write-Host "Applying JACK configuration..."
-Invoke-JackConfiguration -user $user -jackUser $jackUser -jackFolder $jackFolder
+#Invoke-JackConfiguration -user $user -jackUser $jackUser -jackFolder $jackFolder
 Write-Host "----------------------------------------"
 write-host "Installing audio software..."
-Invoke-InstallAudioSoftware
+#Invoke-InstallAudioSoftware
 write-host "----------------------------------------"
 write-host "Elevated OS configuration complete"

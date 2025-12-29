@@ -67,11 +67,11 @@ function Invoke-PatchPythonFiles($pythonVersion,$venvPath)
     write-host "Patching python files in venv at $venvPath."
     $filesToPatch = @("tornado/httputil.py","browsepy/manager.py")
     $filesToPatch |%{
-        $fileToPatch = Get-ChildItem -Path "$venvPath/lib/python$pythonVersion/site-packages/" -Recurse -Filter $_ | Select-Object -First 1
-        if (-not (Test-Path -Path $fileToPatch)) 
+        $fileToPatch = Get-ChildItem -Path "$venvPath/lib/python$pythonVersion/site-packages/" -Recurse -Filter $_ -ErrorAction SilentlyContinue | Select-Object -First 1
+        if (-not $fileToPatch) 
         {
-            write-host "File $fileToPatch not found, cannot patch." -ForegroundColor Yellow
-            exit 1
+            write-host "File $_ not found, skipping patch." -ForegroundColor Yellow
+            return
         }
         Invoke-PatchPythonFile -FileToPatch $fileToPatch
     }

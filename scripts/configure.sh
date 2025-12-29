@@ -11,6 +11,16 @@ function dot_source_os_release_file()
         exit 1
     fi
 }
+function configure_pistomp_powershell_script()
+{
+    pwsh -File "$configure_pistomp_powershell_script_filename" -dtOverlay $dtOverlay
+    #fail on error
+    if [ $? -ne 0 ]; then
+        echo -e "${redText}Pistomp configuration script failed\e[0m"
+        exit 1
+    fi
+
+}
 function git_clone_or_pull_repos() 
 {
     echo "Checking out or pulling latest code from git repos..."
@@ -45,7 +55,7 @@ base_directory="$HOME/pi-stomp/scripts"
 base_powershell_directory="$HOME/pi-stomp/scripts/powershell"
 configure_host_powershell_script_filename="./powershell/configure-host.ps1" #powershell that needs root/sudo.
 configure_pistomp_powershell_script_filename="./powershell/configure-pistomp.ps1" #powershell that does pistomp specific configuration.
-configure_audioservice_powershell_script_filename="./powershell/configure-host-audioservices.ps1" #powershell that creates/starts the audio services.
+configure_audioservices_powershell_script_filename="./powershell/configure-host-audioservices.ps1" #powershell that creates/starts the audio services.
 SYSTEM_INCLUDES="./bash/includes/system.sh"
 if [ ! -f "$SYSTEM_INCLUDES" ]; then
     echo -e "${redText}File $SYSTEM_INCLUDES not found. Cannot continue.\e[0m"
@@ -69,11 +79,11 @@ dot_source_os_release_file # get VERSION_CODENAME and run PowerShell scripts
 echo -e "----------------------------------------"
 run_configure_host_sudo_script #run this script as sudo to do OS configuration tasks that need root.
 echo -e "----------------------------------------"
-invoke-host_configuration_powershell_script
+#invoke-configure-host_powershell_script
 echo -e "----------------------------------------"
 echo "running pistomp installation powershell scripts..."
-pwsh -File "$configure_pistomp_powershell_script_filename" -dtOverlay $dtOverlay
+configure_pistomp_powershell_script
 echo -e "----------------------------------------"
-invoke-audioservice_powershell_script
+invoke-configure-audioservices_powershell_script
 echo -e "----------------------------------------"
 echo "All done!"

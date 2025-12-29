@@ -52,10 +52,8 @@ function Invoke-ModHostSetup()
     pushd mod-host
     write-host "Building and installing mod-host"
     make
-    write-host "Running mod-host make install (binary only, skipping JACK plugin)"
+    write-host "Running mod-host make install."
     make install
-    write-host "Removing incompatible JACK plugin (mod-host.so) that may cause version conflicts"
-    rm -f /usr/local/lib/jack/mod-host.so
     popd
     popd
 }
@@ -63,10 +61,10 @@ function Invoke-ModHostSetup()
 function Invoke-ModUI()
 {
     #test if ~/.env/bin/mod-ui exists
-    $mouduiFound = Test-Path -Path "$($HOME)/.env/bin/mod-ui"
+    $mouduiFound = Test-Path -Path "/usr/local/bin/mod-ui"
     if ($mouduiFound) 
     {
-        Write-Host "Mod-ui already found in python venv; skipping installation."
+        Write-Host "Mod-ui already found. Skipping installation."
         return
     }
     
@@ -84,30 +82,9 @@ function Invoke-ModUI()
     popd
 }
 
-function Invoke-BrowserPy()
-{
-    #test if browsepy is installed
-    $browsepyFound = pip show browsepy -ErrorAction SilentlyContinue
-    if ($browsepyFound) 
-    {
-        Write-Host "browsepy already found; skipping installation."
-        return
-    }
-    
-    $tmpDir = $(mktemp -d)
-    Write-host "Cloning browsepy into temporary folder $tmpDir"
-    pushd $tmpDir && git clone https://github.com/micahvdm/browsepy.git
-    pushd browsepy
-    write-host "Installing browsepy"
-    pip install ./
-    popd
-    popd
-}
-
 function Invoke-InstallAudioSoftware()
 {
     Invoke-CompileJack
     Invoke-ModHostSetup
-    Invoke-BrowserPy
-    Invoke-ModUI
+    # Invoke-ModUI is installed to venv via bash python-venv.sh script
 }

@@ -23,6 +23,13 @@ function Invoke-CheckoutGitRepo($repo)
         write-host "Cloning branch $branch."
         git clone --branch $branch $repoURL $targetFolder
     }
+    
+    # Remove .git folder after cloning as it causes problems with mod-ui
+    if (Test-Path -Path "$($targetFolder)/.git")
+    {
+        remove-item -Path "$($targetFolder)/.git" -Recurse -Force
+        write-host "Removed .git folder from $targetFolder"
+    }
 }
 function Invoke-CheckoutGitRepos($repos) 
 {
