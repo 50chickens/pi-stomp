@@ -201,5 +201,14 @@ check_and_disable_pistomp_services()
         systemctl disable "$service"
         systemctl stop "$service"
     done
+    #remove from /usr/lib/systemd/system & /etc/systemd/system/multi-user.target.wants/ to prevent it from being re-enabled by accident.
+    if [ -f "/usr/lib/systemd/system/$service.service" ]; then
+        rm "/usr/lib/systemd/system/$service.service"
+        echo "Removed /usr/lib/systemd/system/$service.service"
+    fi
+    if [ -f "/etc/systemd/system/multi-user.target.wants/$service.service" ]; then
+        rm "/etc/systemd/system/multi-user.target.wants/$service.service"
+        echo "Removed /etc/systemd/system/multi-user.target.wants/$service.service"
+    fi
     echo -e "${greenText}Pi-Stomp audio services disabled.\e[0m"
 }

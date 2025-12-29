@@ -1,24 +1,28 @@
+function New-Folder($folderToCreate, $baseFolder) 
+{
+    if (![string]::IsNullOrEmpty($baseFolder))
+    {
+        $fullPath = Join-Path -Path $baseFolder -ChildPath $folderToCreate
+    }
+    else {
+        $fullPath = $folderToCreate
+    }
+    #create folder if it does not exist 
+    if (-not (Test-Path -Path $fullPath))
+    {
+        New-Item -ItemType Directory -Path $fullPath | Out-Null
+        Write-Host "Created folder: $fullPath" -ForegroundColor Green
+    }
+    else
+    {
+        Write-Host "Folder already exists: $fullPath" -ForegroundColor Green
+    }
+}
 function New-Folders($foldersToCreate, $baseFolder)
 { 
     $foldersToCreate |%{
         $folderToCreate = $_
-        if (![string]::IsNullOrEmpty($baseFolder))
-        {
-            $fullPath = Join-Path -Path $baseFolder -ChildPath $folderToCreate
-        }
-        else {
-            $fullPath = $folderToCreate
-        }
-        #create folder if it does not exist 
-        if (-not (Test-Path -Path $fullPath))
-        {
-            New-Item -ItemType Directory -Path $fullPath | Out-Null
-            Write-Host "Created folder: $fullPath" -ForegroundColor Green
-        }
-        else
-        {
-            Write-Host "Folder already exists: $fullPath" -ForegroundColor Green
-        }
+        New-Folder -folderToCreate $folderToCreate -baseFolder $baseFolder
     }
 }
 function New-LinkedFolder($folderName)

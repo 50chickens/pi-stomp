@@ -17,9 +17,17 @@
 
 function Invoke-CompileJack()
 {
+    #test if jack2 binaries are already found in path
+    $jackFound = Get-Command jackd -ErrorAction SilentlyContinue
+    if ($jackFound) 
+    {
+        Write-Host "Jack2 binaries already found in path; skipping compilation."
+        return
+    }
+    
     $tmpDir = $(mktemp -d)
     Write-host "Cloning jack2 into temporary folder $tmpDir"
-    pushd $tmpDir && git clone https://github.com/micahvdm/jack2.git
+    pushd $tmpDir && git clone https://github.com/jackaudio/jack2.git
     pushd jack2
     write-host "running jack2 configure."
     ./waf configure
@@ -29,11 +37,19 @@ function Invoke-CompileJack()
     popd
     popd
 }
-function Invoke-ModSetup()
+function Invoke-ModHostSetup()
 {
+
+    #test if mod-host is already found in path
+    $modHostFound = Get-Command mod-host -ErrorAction SilentlyContinue
+    if ($modHostFound) 
+    {
+        Write-Host "mod-host already found in path; skipping installation."
+        return
+    }
     $tmpDir = $(mktemp -d)
     Write-host "Cloning mod-host into temporary folder $tmpDir"
-    pushd $tmpDir && git clone https://github.com/micahvdm/mod-host.git
+    pushd $tmpDir && git clone https://github.com/mod-audio/mod-host.git
     pushd mod-host
     write-host "building and installing mod-host"
     make
@@ -45,9 +61,17 @@ function Invoke-ModSetup()
 
 function Invoke-ModUI()
 {
+    #test if ~/.env/bin/mod-ui exists
+    $mouduiFound = Test-Path -Path "$($HOME)/.env/bin/mod-ui"
+    if ($mouduiFound) 
+    {
+        Write-Host "mod-ui already found in python venv; skipping installation."
+        return
+    }
+    
     $tmpDir = $(mktemp -d)
     Write-host "Cloning mod-ui into temporary folder $tmpDir"
-    pushd $tmpDir && git clone https://github.com/micahvdm/mod-ui.git
+    pushd $tmpDir && git clone https://github.com/mod-audio/mod-ui.git
     pushd mod-ui
     write-host "Setting up mod-ui"
     chmod +x setup.py
@@ -62,8 +86,8 @@ function Invoke-ModUI()
 function Invoke-InstallAudioSoftware()
 {
     Invoke-CompileJack
-    Invoke-ModSetup
-    Invoke-ModUI
+    Invoke-ModHostSetup
+    #Invoke-ModUI #moved to the python venv setup script
 }
 function New-SystemDService($servicesUnitFile) 
 {

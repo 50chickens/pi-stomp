@@ -35,14 +35,32 @@ foreach ($param in $parametersToValidate)
 
 function New-DataFolders($foldersToCreate, $userFoldersToCreate)
 {
-    New-Folders -foldersToCreate $foldersToCreate -baseFolder "~"
-    New-Folders -foldersToCreate $userFoldersToCreate -baseFolder "~/data/user-files"
+    New-Folders -foldersToCreate $foldersToCreate
 }
 
 
-$foldersToCreate = @("data/.pedalboards", "data/user-files", ".lv2")
-$linkedFolders = @(".lv2", ".pedalboards")
-$userFoldersToCreate = @("Speaker Cabinets IRs", "Reverb IRs", "Audio Loops", "Audio Recordings", "Audio Samples", "Audio Tracks", "MIDI Clips", "MIDI Songs", "Hydrogen Drumkits", "SF2 Instruments", "SFZ Instruments", "Amplifier Profiles", "Aida DSP Models", "NAM Models")
+#$foldersToCreate = @("data/.pedalboards", "data/user-files", ".lv2")
+
+$modFolder = ".mod"
+$lv2Folder = "$($modFolder)/.lv2"
+$modDataFolder = "$modFolder/data"
+$userFilesDirectory = "$modDataFolder/user-files"
+$pedalBoardsDirectory = "$modDataFolder/pedalboards"
+$foldersToCreate = @($modFolder, $lv2Folder, $modDataFolder, $userFilesDirectory, $pedalBoardsDirectory)
+
+write-host "Mod folder: $modFolder"
+write-host "LV2 folder: $lv2Folder"
+write-host "Mod data folder: $modDataFolder"
+write-host "User files directory: $userFilesDirectory"
+write-host "Pedalboards directory: $pedalBoardsDirectory"
+
+$repos = @()
+$repos += [PSCustomObject]@{RepoURL = "https://github.com/TreeFallSound/pi-stomp-pedalboards.git";CheckOutFolder=$pedalBoardsDirectory}
+$repos += [PSCustomObject]@{RepoURL = "https://github.com/TreeFallSound/pi-stomp-user-files.git";CheckOutFolder=$userFilesDirectory} 
+
+
+#$linkedFolders = @(".lv2", ".pedalboards")
+#$userFoldersToCreate = @("Speaker Cabinets IRs", "Reverb IRs", "Audio Loops", "Audio Recordings", "Audio Samples", "Audio Tracks", "MIDI Clips", "MIDI Songs", "Hydrogen Drumkits", "SF2 Instruments", "SFZ Instruments", "Amplifier Profiles", "Aida DSP Models", "NAM Models")
 $pythonPackageInstallationScript = "../bash/python-venv.sh"
 Write-Host "----------------------------------------"
 write-host "testing that we're in the expected directory..." 
@@ -55,8 +73,13 @@ write-host "getting OS release information..."
 Get-OSRelease #sets global variables from /etc/os-release
 Write-Host "----------------------------------------"
 write-host "creating data folders..." 
-#New-DataFolders -foldersToCreate $foldersToCreate -userFoldersToCreate $userFoldersToCreate
+New-DataFolders -foldersToCreate $foldersToCreate
 Write-Host "----------------------------------------"
+Write-Host "Checking out required repos..."
+Invoke-CheckoutGitRepos -repos $repos
+Write-Host "----------------------------------------"
+exit
+
 Write-Host "creating linked folders"
 #New-LinkedFolders -linkedFolders $linkedFolders
 Write-Host "----------------------------------------"
@@ -71,3 +94,4 @@ Invoke-InstallPythonPackages -pythonPackageInstallationScript $pythonPackageInst
 Write-Host "----------------------------------------"
 Write-Host "patching python files for compatibility..."
 Invoke-PatchPythonFiles -pythonVersion $pythonVersion -venvPath "$($HOME)/.env"
+Write-Host "----------------------------------------"
