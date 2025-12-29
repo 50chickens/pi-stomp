@@ -4,7 +4,8 @@ function New-Folder($folderToCreate, $baseFolder)
     {
         $fullPath = Join-Path -Path $baseFolder -ChildPath $folderToCreate
     }
-    else {
+    else 
+    {
         $fullPath = $folderToCreate
     }
     #create folder if it does not exist 

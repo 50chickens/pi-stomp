@@ -32,8 +32,9 @@ foreach ($param in $parametersToValidate)
 {
     Test-ScriptParametersAreValid -paramValue $param.Value -paramName $param.Name
 }
-
-$modFolder = ".mod"
+$baseFolder = $HOME
+write-host "Base folder: $baseFolder"
+$modFolder = "$($baseFolder)/.mod"
 $lv2Folder = "$($modFolder)/.lv2"
 $modDataFolder = "$modFolder/data"
 $userFilesDirectory = "$modDataFolder/user-files"
@@ -65,7 +66,7 @@ write-host "getting OS release information..."
 Get-OSRelease #sets global variables from /etc/os-release
 Write-Host "----------------------------------------"
 write-host "creating data folders..." 
-New-Folders -foldersToCreate $foldersToCreate -baseFolder $HOME
+New-Folders -foldersToCreate $foldersToCreate
 Write-Host "----------------------------------------"
 Write-Host "Checking out required repos..."
 Invoke-CheckoutGitRepos -repos $repos
