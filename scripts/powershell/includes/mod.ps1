@@ -27,7 +27,7 @@ function Invoke-CompileJack()
     
     $tmpDir = $(mktemp -d)
     Write-host "Cloning jack2 into temporary folder $tmpDir"
-    pushd $tmpDir && git clone https://github.com/jackaudio/jack2.git
+    pushd $tmpDir && git clone https://github.com/micahvdm/jack2.git
     pushd jack2
     write-host "running jack2 configure."
     ./waf configure
@@ -48,7 +48,7 @@ function Invoke-ModHostSetup()
     }
     $tmpDir = $(mktemp -d)
     Write-host "Cloning mod-host into temporary folder $tmpDir"
-    pushd $tmpDir && git clone https://github.com/mod-audio/mod-host.git
+    pushd $tmpDir && git clone https://github.com/micahvdm/mod-host.git
     pushd mod-host
     write-host "Building and installing mod-host"
     make
@@ -72,7 +72,7 @@ function Invoke-ModUI()
     
     $tmpDir = $(mktemp -d)
     Write-host "Cloning mod-ui into temporary folder $tmpDir"
-    pushd $tmpDir && git clone https://github.com/mod-audio/mod-ui.git
+    pushd $tmpDir && git clone https://github.com/micahvdm/mod-ui.git
     pushd mod-ui
     write-host "Setting up mod-ui"
     chmod +x setup.py
@@ -84,8 +84,30 @@ function Invoke-ModUI()
     popd
 }
 
+function Invoke-BrowserPy()
+{
+    #test if browsepy is installed
+    $browsepyFound = pip show browsepy -ErrorAction SilentlyContinue
+    if ($browsepyFound) 
+    {
+        Write-Host "browsepy already found; skipping installation."
+        return
+    }
+    
+    $tmpDir = $(mktemp -d)
+    Write-host "Cloning browsepy into temporary folder $tmpDir"
+    pushd $tmpDir && git clone https://github.com/micahvdm/browsepy.git
+    pushd browsepy
+    write-host "Installing browsepy"
+    pip install ./
+    popd
+    popd
+}
+
 function Invoke-InstallAudioSoftware()
 {
     Invoke-CompileJack
     Invoke-ModHostSetup
+    Invoke-BrowserPy
+    Invoke-ModUI
 }
