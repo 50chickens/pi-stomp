@@ -8,23 +8,28 @@ Requires=browsepy.service
 [Service]
 LimitRTPRIO=95
 LimitMEMLOCK=infinity
-Environment=LV2_PATH=%h/.mod/lv2
-Environment=MOD_DATA_DIR=%h/.mod
-Environment=MOD_USER_PEDALBOARDS_DIR=%h/.mod/pedalboards
-Environment=MOD_USER_FILES_DIR=%h/.mod/user-files
-Environment=MOD_USER_PLUGINS_DIR=%h/.mod/lv2
-Environment=MOD_KEYS_PATH=%h/.mod/keys
+Environment=ALSA_CARD=default
+Environment=LV2_PATH=/home/pistomp/.mod/.lv2:/usr/lib/lv2:/usr/local/lib/lv2
+Environment=MOD_DATA_DIR=/home/pistomp/.mod
+Environment=MOD_USER_PEDALBOARDS_DIR=/home/pistomp/.mod/pedalboards
+Environment=MOD_USER_FILES_DIR=/home/pistomp/.mod/data/user-files
+Environment=MOD_USER_PLUGINS_DIR=/home/pistomp/.mod/lv2
+Environment=MOD_KEYS_PATH=/home/pistomp/.mod/keys
 Environment=MOD_DEV_ENVIRONMENT=0
 Environment=MOD_DEVICE_WEBSERVER_PORT=80
-Environment=MOD_LOG=0
+Environment=MOD_LOG=3
 Environment=MOD_HTML_DIR=/usr/local/share/mod/html
+Environment=LILV_LOGLEVEL=0
+Environment=MODTOOLS_LOG_LEVEL=1
 Environment=JACK_PROMISCUOUS_SERVER=jack
+Environment=PATCHSTORAGE_ENABLED=1
 Environment=PATCHSTORAGE_API_URL=https://patchstorage.com/api/beta/patches
 Environment=PATCHSTORAGE_PLATFORM_ID=8046
 Environment=PATCHSTORAGE_TARGET_ID=8280
+Environment=BLOKAS_ENABLED=1
 
 WorkingDirectory=/home/pistomp/.env/bin
-ExecStart=/usr/bin/authbind /home/pistomp/.env/bin/python /home/pistomp/.env/bin/mod-ui
+ExecStart=/usr/bin/authbind /home/pistomp/.env/bin/mod-ui
 User=pistomp
 Group=pistomp
 Restart=always

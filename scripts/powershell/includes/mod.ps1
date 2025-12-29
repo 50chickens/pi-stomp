@@ -40,21 +40,22 @@ function Invoke-CompileJack()
 function Invoke-ModHostSetup()
 {
 
-    #test if mod-host is already found in path
     $modHostFound = Get-Command mod-host -ErrorAction SilentlyContinue
     if ($modHostFound) 
     {
-        Write-Host "mod-host already found in path; skipping installation."
+        Write-Host "Mod-host already found in path; skipping installation."
         return
     }
     $tmpDir = $(mktemp -d)
     Write-host "Cloning mod-host into temporary folder $tmpDir"
     pushd $tmpDir && git clone https://github.com/mod-audio/mod-host.git
     pushd mod-host
-    write-host "building and installing mod-host"
+    write-host "Building and installing mod-host"
     make
-    write-host "running mod-host make install"
+    write-host "Running mod-host make install (binary only, skipping JACK plugin)"
     make install
+    write-host "Removing incompatible JACK plugin (mod-host.so) that may cause version conflicts"
+    rm -f /usr/local/lib/jack/mod-host.so
     popd
     popd
 }
@@ -65,7 +66,7 @@ function Invoke-ModUI()
     $mouduiFound = Test-Path -Path "$($HOME)/.env/bin/mod-ui"
     if ($mouduiFound) 
     {
-        Write-Host "mod-ui already found in python venv; skipping installation."
+        Write-Host "Mod-ui already found in python venv; skipping installation."
         return
     }
     
@@ -87,55 +88,4 @@ function Invoke-InstallAudioSoftware()
 {
     Invoke-CompileJack
     Invoke-ModHostSetup
-    #Invoke-ModUI #moved to the python venv setup script
-}
-function New-SystemDService($servicesUnitFile) 
-{
-    $systemDFolder = "/usr/lib/systemd/system"
-    $servicesUnitFile = $_
-    $serviceName = [System.IO.Path]::GetFileNameWithoutExtension($servicesUnitFile.Name) #eg - mod-host
-    $serviceUnitFileName = $servicesUnitFile.Name #eg - mod-host.service
-    $targetServiceFileName = "$systemDFolder/$serviceUnitFileName" #eg /usr/lib/systemd/system/mod-host.service
-    Write-Host "Processing service: $serviceName"
-    write-host "service unit file name: $audioServiceUnitFileName"
-    write-host "Target service file name: $targetServiceFileName"
-    
-    if (Test-Path -Path "$targetServiceFileName")
-    {
-        Write-Host "Removing existing service file: $targetServiceFileName" -ForegroundColor Yellow
-        Remove-Item -Path "$targetServiceFileName" -Force
-    }
-    Write-Host "Copying service file: $($servicesUnitFile.FullName) to $systemDFolder"    
-    copy-item $servicesUnitFile -Destination "$systemDFolder/$serviceUnitFileName"
-    Write-Host "Creating symlink for $serviceName in /etc/systemd/system/multi-user.target.wants/"
-
-    ln -sf $targetServiceFileName /etc/systemd/system/multi-user.target.wants/
-}
-function New-AudioSystemDServices($servicesUnitFileFolder)
-{
-    write-host "services unit file folder: $servicesUnitFileFolder"
-    $servicesUnitFiles = get-childitem -path $servicesUnitFileFolder -filter *.service
-    if (-not $servicesUnitFiles) {
-        write-host "No service unit files found in $servicesUnitFileFolder" -ForegroundColor Yellow
-        return
-    }
-    $servicesUnitFiles |%{
-        New-SystemDService -ServicesUnitFile $_
-        }
-}
-
-function Start-SystemDService($service)
-{
-    Write-Host "Enabling and starting service: $service"
-    systemctl enable $service
-    systemctl start $service
-    systemctl status $service --no-pager
-}
-function Start-SystemDServices($services)
-{
-    systemctl daemon-reload
-    $services |%{
-        $service = $_
-        Start-SystemDService -service $service
-    }
 }

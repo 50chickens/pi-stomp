@@ -17,13 +17,13 @@ test_if_were_root
 echo -e "----------------------------------------"
 test_if_were_in_root_directory
 echo -e "----------------------------------------"
-install_backports
+#install_backports
 echo -e "----------------------------------------"
-install_powershell
+#install_powershell
 echo -e "----------------------------------------"
-install_dotnet
+#install_dotnet
 echo -e "----------------------------------------"
-disable_ipv6_on_boot
+#disable_ipv6_on_boot
 echo -e "----------------------------------------"
 check_and_disable_pistomp_services
 echo -e "----------------------------------------"

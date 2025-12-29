@@ -121,33 +121,6 @@ function Enable-AudioOverlay($dtOverLay, $configTxtPath)
     return $true
 }
 
-function Install-AudioPackages($audioPackages)
-{
-    Write-Host "Installing audio packages: $($audioPackages -join ', ')"
-    #create a list of any packages that are not already installed
-    $packagesToInstall = @()
-    foreach ($package in $audioPackages)
-    {
-        $packageInstalled = dpkg -l | Select-String -Pattern $package
-        if (-not $packageInstalled) 
-        {
-            $packagesToInstall += $package
-        }
-        else 
-        {
-            Write-Host "Package $package is already installed."
-        }
-    }
-    #if any packages need to be installed, install them
-    if ($packagesToInstall.Count -eq 0)
-    {
-        Write-Host "All audio packages are already installed."
-        return
-    }
-    Write-Host "Packages to install: $($packagesToInstall -join ', ')"  
-    Invoke-PackageInstall -packageList $packagesToInstall
-}
-
 function Install-Audio($configTxtPath, $dtOverlay)
 {
     $audioDevice = Get-AudioDeviceConfigfromOverlayName -configTxtPath $configTxtPath -dtOverLay $dtOverlay
@@ -219,4 +192,15 @@ function Invoke-JackConfiguration($user, $jackUser, $jackFolder)
     Write-Host "Setting ownership of /etc/authbind/byport/80 to $user"
     $chown = @($user,$user) -join ":"
     chown $chown /etc/authbind/byport/80
+}
+Function Restore-AlsaState($alsaStateFilePath)
+{
+    if (-not (Test-Path -Path $alsaStateFilePath)) 
+    {
+        write-host "ALSA state file $alsaStateFilePath not found. Cannot restore ALSA state." -ForegroundColor Red
+        exit 1
+    }
+    write-host "Restoring ALSA state from file: $alsaStateFilePath"
+    alsactl restore -f $alsaStateFilePath --no-ucm
+    write-host "ALSA state restored." -ForegroundColor Green
 }

@@ -7,7 +7,8 @@ function Invoke-CheckoutGitRepo($repo)
     #if the .git folder exists in the target folder, do a git pull instead of cloning.
     if ((Test-Path -Path $targetFolder) -and (Test-Path -Path "$($targetFolder)/.git")) 
     {
-        Invoke-GitPull -targetFolder $targetFolder
+        #we need to remove the .git folder because it causes problems with mod-ui later on.
+        remove-item -Path "$($targetFolder)/.git" -Recurse -Force
         return  
     }
     

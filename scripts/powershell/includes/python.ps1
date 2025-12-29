@@ -66,11 +66,8 @@ function Invoke-PatchPythonFiles($pythonVersion,$venvPath)
 {
     write-host "Patching python files in venv at $venvPath."
     $filesToPatch = @("tornado/httputil.py","browsepy/manager.py")
-
     $filesToPatch |%{
-        #find the file underneath the venv site-packages folder by using recursive get-childitem
         $fileToPatch = Get-ChildItem -Path "$venvPath/lib/python$pythonVersion/site-packages/" -Recurse -Filter $_ | Select-Object -First 1
-
         if (-not (Test-Path -Path $fileToPatch)) 
         {
             write-host "File $fileToPatch not found, cannot patch." -ForegroundColor Yellow
@@ -78,10 +75,4 @@ function Invoke-PatchPythonFiles($pythonVersion,$venvPath)
         }
         Invoke-PatchPythonFile -FileToPatch $fileToPatch
     }
-    # $httputilPath = "$venvPath/lib/python$pythonVersion/site-packages/tornado/httputil.py"
-    # $managerPath = "$venvPath/lib/python$pythonVersion/site-packages/browsepy/manager.py"
-    # $replacedContent = (Get-Content -path $httputilPath) -replace 
-    # set-content -path $httputilPath -value 
-    # set-content -path $httputilPath -value (Get-Content -path $httputilPath) -replace 'collections\.Mapping', 'collections.abc.Mapping'
-    # set-content -path $managerPath -value (Get-Content -path $managerPath) -replace 'collections\.Mapping', 'collections.abc.Mapping'
 }

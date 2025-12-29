@@ -1,4 +1,14 @@
-function invoke-elevated-powershell() 
+function invoke-audioservice_powershell_script() 
+{
+    echo "running $configure_audioservice_powershell_script_filename with sudo -E pwsh..."
+    sudo -E pwsh -File "$configure_audioservice_powershell_script_filename" -alsaStateFile $alsaStateFile
+    if [ $? -ne 0 ]; then
+        echo -e "${redText}Audio service configuration script failed\e[0m"
+        exit 1
+    fi
+    echo -e "${greenText}Audio service configuration script completed successfully.\e[0m"
+}
+function invoke-host_configuration_powershell_script() 
 {
     #print out the value of ELEVATED_EXIT_CODE if we found it.
     echo "checking for environment variables from previous runs."
@@ -197,9 +207,20 @@ check_and_disable_pistomp_services()
         echo "Service $service not found, skipping."
         continue
     fi
-        echo "Disabling and stopping service: $service"
-        systemctl disable "$service"
-        systemctl stop "$service"
+        #test if the service is active before trying to stop it.
+        if systemctl is-active --quiet "$service"; then
+            echo "Service $service is active, stopping it."
+            systemctl stop "$service"
+        else
+            echo "Service $service is not active, no need to stop."
+        fi
+        #test if the service is enabled before trying to disable it.
+        if systemctl is-enabled --quiet "$service"; then
+            echo "Service $service is enabled, disabling it."
+            systemctl disable "$service"
+        else
+            echo "Service $service is not enabled, no need to disable."
+        fi
     done
     #remove from /usr/lib/systemd/system & /etc/systemd/system/multi-user.target.wants/ to prevent it from being re-enabled by accident.
     if [ -f "/usr/lib/systemd/system/$service.service" ]; then
