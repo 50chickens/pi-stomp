@@ -32,15 +32,16 @@ foreach ($param in $parametersToValidate)
 {
     Test-ScriptParametersAreValid -paramValue $param.Value -paramName $param.Name
 }
+$baseGithubOrganization = "TreeFallSound"
 $baseFolder = $HOME
 write-host "Base folder: $baseFolder"
 $modFolder = "$($baseFolder)/.mod"
 $lv2Folder = "$($modFolder)/.lv2"
 $modDataFolder = "$modFolder/data"
 $userFilesDirectory = "$modDataFolder/user-files"
-$pedalBoardsDirectory = "$modDataFolder/pedalboards"
+$pedalBoardsDirectory = "$modFolder/pedalboards"
 $foldersToCreate = @($modFolder, $lv2Folder, $modDataFolder, $userFilesDirectory, $pedalBoardsDirectory)
-
+$linkedFolders = @() #empty as we don't need any linked folders for pi-stomp currently.
 write-host "Mod folder: $modFolder"
 write-host "LV2 folder: $lv2Folder"
 write-host "Mod data folder: $modDataFolder"
@@ -48,12 +49,9 @@ write-host "User files directory: $userFilesDirectory"
 write-host "Pedalboards directory: $pedalBoardsDirectory"
 
 $repos = @()
-$repos += [PSCustomObject]@{RepoURL = "https://github.com/TreeFallSound/pi-stomp-pedalboards.git";CheckOutFolder=$pedalBoardsDirectory}
-$repos += [PSCustomObject]@{RepoURL = "https://github.com/TreeFallSound/pi-stomp-user-files.git";CheckOutFolder=$userFilesDirectory} 
+$repos += [PSCustomObject]@{RepoURL = "https://github.com/$baseGithubOrganization/pi-stomp-pedalboards.git";CheckOutFolder=$pedalBoardsDirectory}
+$repos += [PSCustomObject]@{RepoURL = "https://github.com/$baseGithubOrganization/pi-stomp-user-files.git";CheckOutFolder=$userFilesDirectory} 
 
-
-#$linkedFolders = @(".lv2", ".pedalboards")
-#$userFoldersToCreate = @("Speaker Cabinets IRs", "Reverb IRs", "Audio Loops", "Audio Recordings", "Audio Samples", "Audio Tracks", "MIDI Clips", "MIDI Songs", "Hydrogen Drumkits", "SF2 Instruments", "SFZ Instruments", "Amplifier Profiles", "Aida DSP Models", "NAM Models")
 $pythonPackageInstallationScript = "../bash/python-venv.sh"
 Write-Host "----------------------------------------"
 write-host "testing that we're in the expected directory..." 
@@ -65,18 +63,17 @@ Write-Host "----------------------------------------"
 write-host "getting OS release information..." 
 Get-OSRelease #sets global variables from /etc/os-release
 Write-Host "----------------------------------------"
+write-host "getting python version..."
+$pythonVersion = Get-PythonVersion #for python version we only need the major.minor part, eg 3.11. use regex to get named group for major.minor
+Write-Host "----------------------------------------"
 write-host "creating data folders..." 
 New-Folders -foldersToCreate $foldersToCreate
 Write-Host "----------------------------------------"
 Write-Host "Checking out required repos..."
 Invoke-CheckoutGitRepos -repos $repos
 Write-Host "----------------------------------------"
-exit
-
 Write-Host "creating linked folders"
-#New-LinkedFolders -linkedFolders $linkedFolders
-Write-Host "----------------------------------------"
-$pythonVersion = Get-PythonVersion #for python version we only need the major.minor part, eg 3.11. use regex to get named group for major.minor
+New-LinkedFolders -linkedFolders $linkedFolders
 Write-Host "----------------------------------------"
 Write-Host "creating new python environment."
 New-EmptyPythonVenv -venvPath "$($HOME)/.env"

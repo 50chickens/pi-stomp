@@ -4,15 +4,17 @@ function Invoke-CheckoutGitRepo($repo)
     $targetFolder = $repo.CheckOutFolder
     $repoURL = $repo.RepoURL
     
-    if (Test-Path -Path $targetFolder) 
+    #if the .git folder exists in the target folder, do a git pull instead of cloning.
+    if ((Test-Path -Path $targetFolder) -and (Test-Path -Path "$($targetFolder)/.git")) 
     {
         Invoke-GitPull -targetFolder $targetFolder
         return  
     }
+    
     write-host "Cloning repo $repoURL into folder $targetFolder"
     if (-not $repo.Branch)  #if no branch specified, clone default branch
     {
-        git clone  $repoURL $targetFolder    
+        git clone $repoURL $targetFolder    
     }
     else 
     {
@@ -31,7 +33,7 @@ function Invoke-CheckoutGitRepos($repos)
 
 function Invoke-GitPull($targetFolder)
 {
-    Write-Host "Target folder $targetFolder already exists; Doing git pull from $($repo.Branch) branch." -ForegroundColor Yellow
+    Write-Host "Target folder $targetFolder exists; Doing git pull from $($repo.Branch) branch." -ForegroundColor Yellow
     Push-Location $targetFolder
     #test if there are local changes. if so, print warning and skip git pull.
     $localChanges = git status --porcelain
