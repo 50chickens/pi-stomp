@@ -1,3 +1,9 @@
+function Invoke-ChangeToDirectory($directory) 
+{
+    Write-Host "Changing to directory: $directory"
+    Set-Location -Path $directory
+}
+
 function Test-ScriptParametersAreValid($paramValue, $paramName)
 { 
     if ([string]::IsNullOrEmpty($paramValue)) 
