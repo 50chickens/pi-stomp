@@ -169,8 +169,11 @@ function Invoke-JackConfiguration($user, $jackUser, $jackFolder)
     chmod +x /etc/jackdrc
     $chown = @($jackUser,$jackUser) -join ":"
     Write-Host "Setting ownership of /etc/jackdrc to $chown"
-    chown $chown /etc/jackdrc
+    chown $chown /etc/jackdrc    
+}
 
+function Invoke-AuthBindConfiguration($user, $jackFolder)
+{
     if (Test-Path "/etc/authbind/byport/80")
     {
         write-Host "Removing existing /etc/authbind/byport/80"

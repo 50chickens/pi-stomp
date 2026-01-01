@@ -46,15 +46,37 @@ function New-Symlink($linkFromPath, $linkToPath)
     Write-Host "Creating symlink: $linkFromPath -> $linkToPath" -ForegroundColor Green
     ln -s $linkToPath $linkFromPath
 }
-function New-LinkedFolders($linkedFolders)
+# function New-LinkedFolders($linkedFolders)
+# {
+#     $linkedFolders |%{
+#         New-LinkedFolder -folderName $_
+#     }
+# }
+
+function Remove-UserdataFolders()
 {
-    $linkedFolders |%{
-        New-LinkedFolder -folderName $_
+    $folders = @("~/data", "~/.pedalboards", "~/.lv2")
+    $folders |%{
+        $folder = $_
+        if (Test-Path -Path $folder)
+        {
+            Write-Host "Removing folder: $folder" -ForegroundColor Yellow
+            rm -rf 
+        }
     }
 }
-
 function New-LinkedFolders()
 {
+    $folders = @("/home/pistomp/data/.pedalboards", "/home/pistomp/.pedalboards", "/home/pistomp/.lv2", "/home/pistomp/data/.lv2")
+    Write-Host "Creating linked folders..." -ForegroundColor Cyan
+    $folders |%{
+        $folder = $_
+        if (Test-Path -Path $folder)
+        {
+            Write-Host "$folder already exists. Removing" -ForegroundColor Yellow
+            remove-item -force $folder -recurse #remove item won't remove symlinks where the target is missing.
+        }
+    }
     ln -s /home/pistomp/data/.pedalboards /home/pistomp/.pedalboards
     ln -s /home/pistomp/.lv2 /home/pistomp/data/.lv2    
 }

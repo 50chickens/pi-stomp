@@ -1,78 +1,19 @@
-function Remove-NonBundleFilesFromPedalboards
+function Remove-UnrelatedFilesFromUserDataFolder($directory, $FilesToRemoveFromUserFolders)
 {
-    <#
-    .SYNOPSIS
-    Remove non-bundle files from the pedalboards directory that can cause lilv scanning errors.
-    
-    .DESCRIPTION
-    Removes README.md, LICENSE, and other non-.pedalboard files from the pedalboards directory
-    that cause mod-ui to crash when lilv tries to scan them as plugin bundles.
-    
-    .PARAMETER PedalboardsDirectory
-    The path to the pedalboards directory. Default: /home/pistomp/data/.pedalboards
-    
-    .EXAMPLE
-    Remove-NonBundleFilesFromPedalboards
-    #>
-    
-    param (
-        [string]$PedalboardsDirectory = "$HOME/data/.pedalboards"
-    )
-    
-    Write-Host "Cleaning up non-bundle files from pedalboards directory..." -ForegroundColor Cyan
-    
-    if (-not (Test-Path -Path $PedalboardsDirectory)) {
-        Write-Host "Pedalboards directory not found: $PedalboardsDirectory" -ForegroundColor Yellow
+    Write-Host "Cleaning up non-bundle files from directory $Directory" -ForegroundColor Cyan
+    if (-not (Test-Path -Path $Directory)) 
+    {
+        Write-Host "Directory not found: $Directory" -ForegroundColor Yellow
         return
     }
-    
-    # List of non-bundle files to remove
-    $filesToRemove = @(
-        "README.md",
-        "LICENSE",
-        ".gitignore",
-        ".git"
-    )
-    
-    $removed = $false
-    
-    foreach ($file in $filesToRemove) {
-        $fullPath = Join-Path -Path $PedalboardsDirectory -ChildPath $file
-        
-        if (Test-Path -Path $fullPath) {
-            try {
-                Remove-Item -Path $fullPath -Recurse -Force -ErrorAction Stop
-                Write-Host "  Removed: $file" -ForegroundColor Green
-                $removed = $true
-            } catch {
-                Write-Host "  Error removing $file : $_" -ForegroundColor Red
-            }
-        }
-    }
-    
-    if (-not $removed) {
-        Write-Host "  No non-bundle files found to remove" -ForegroundColor Yellow
-    }
-    
-    Write-Host "Pedalboards cleanup complete" -ForegroundColor Green
+    Get-ChildItem -Path $directory -Recurse |?{return $FilesToRemoveFromUserFolders -contains $_.Name} |%{remove-item -Path $_.FullName -Force -recurse}
+    Get-ChildItem -Path $directory -Recurse -Hidden |?{return $FilesToRemoveFromUserFolders -contains $_.Name} |%{remove-item -Path $_.FullName -Force -recurse}
 }
 
 function Invoke-RestartAudioServices
 {
-    <#
-    .SYNOPSIS
-    Restart mod-host and mod-ui services in proper order.
-    
-    .DESCRIPTION
-    Restarts mod-host first (to rescan plugins), then mod-ui (to refresh UI).
-    Includes appropriate delays between restarts.
-    
-    .EXAMPLE
-    Invoke-RestartAudioServices
-    #>
     
     Write-Host "Restarting audio services..." -ForegroundColor Cyan
-    
     $services = @(
         "mod-host",
         "mod-ui"

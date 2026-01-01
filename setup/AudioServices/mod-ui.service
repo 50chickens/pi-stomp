@@ -20,7 +20,7 @@ Environment=MOD_LIVE_ISO=0
 Environment=MOD_SYSTEM_OUTPUT=1
 Environment=MOD_DATA_DIR=/home/pistomp/data
 Environment=MOD_USER_FILES_DIR=/home/pistomp/data/user-files
-Environment=MOD_HTML_DIR=/usr/local/share/mod/html
+Environment=MOD_HTML_DIR=/home/pistomp/.env/share/mod/html
 Environment=JACK_PROMISCUOUS_SERVER=jack
 Environment=PATCHSTORAGE_API_URL=https://patchstorage.com/api/beta/patches
 Environment=PATCHSTORAGE_PLATFORM_ID=8046

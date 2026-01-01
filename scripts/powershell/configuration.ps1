@@ -79,19 +79,20 @@ function New-PiStompConfiguration {
         JackFolder = "../../setup/mod"
         ServicesToDisable = @("bluetooth", "dnsmasq", "exim4", "fluidsynth")
         CockPitPackages = @("cockpit", "cockpit-packagekit", "cockpit-storaged", "cockpit-networkmanager")
-        MainPackages = @(
-            "virtualenv", "python3-pip", "python3-dev", "python3-zeroconf", "build-essential",
-            "libasound2-dev", "libjack-jackd2-dev", "liblilv-dev", "libjpeg-dev", "zlib1g-dev",
-            "cmake", "debhelper", "dh-autoreconf", "dh-python", "gperf", "intltool", "ladspa-sdk",
-            "libarmadillo-dev", "libavahi-gobject-dev", "libavcodec-dev", "libavutil-dev",
-            "libbluetooth-dev", "libboost-dev", "libeigen3-dev", "libfftw3-dev", "libglib2.0-dev",
-            "libglibmm-2.4-dev", "libgtk2.0-dev", "libgtkmm-2.4-dev", "liblrdf0-dev",
-            "libsamplerate0-dev", "libsigc++-2.0-dev", "libsndfile1-dev", "libzita-convolver-dev",
-            "libzita-resampler-dev", "lv2-dev", "p7zip-full", "python3-all", "python3-setuptools",
-            "libreadline-dev", "zita-alsa-pcmi-utils", "hostapd", "dnsmasq", "iptables",
-            "python3-smbus", "liblo-dev", "python3-liblo", "libzita-alsa-pcmi-dev", "authbind",
-            "libfluidsynth-dev", "lockfile-progs", "tree"
-        )
+        AudioPackages = @("libreadline-dev", "liblilv-dev", "lilv-utils", "libfftw3-dev", "libjack-jackd2-dev", "authbind", "virtualenv", "python3-pip", "python3-dev", "git", "build-essential", "libasound2-dev", "libjack-jackd2-dev", "liblilv-dev", "libjpeg-dev", "zlib1g-dev","jackd2")
+        # MainPackages = @(
+        #     "virtualenv", "python3-pip", "python3-dev", "python3-zeroconf", "build-essential",
+        #     "libasound2-dev", "libjack-jackd2-dev", "liblilv-dev", "libjpeg-dev", "zlib1g-dev",
+        #     "cmake", "debhelper", "dh-autoreconf", "dh-python", "gperf", "intltool", "ladspa-sdk",
+        #     "libarmadillo-dev", "libavahi-gobject-dev", "libavcodec-dev", "libavutil-dev",
+        #     "libbluetooth-dev", "libboost-dev", "libeigen3-dev", "libfftw3-dev", "libglib2.0-dev",
+        #     "libglibmm-2.4-dev", "libgtk2.0-dev", "libgtkmm-2.4-dev", "liblrdf0-dev",
+        #     "libsamplerate0-dev", "libsigc++-2.0-dev", "libsndfile1-dev", "libzita-convolver-dev",
+        #     "libzita-resampler-dev", "lv2-dev", "p7zip-full", "python3-all", "python3-setuptools",
+        #     "libreadline-dev", "zita-alsa-pcmi-utils", "hostapd", "dnsmasq", "iptables",
+        #     "python3-smbus", "liblo-dev", "python3-liblo", "libzita-alsa-pcmi-dev", "authbind",
+        #     "libfluidsynth-dev", "lockfile-progs", "tree"
+        # )
         OtherPackages = @(
             "liblilv-dev", "lv2-dev", "libserd-dev", "libsord-dev", "libsratom-dev",
             "lilv-utils", "liblilv-0-0"
@@ -113,6 +114,7 @@ function New-PiStompConfiguration {
             "bc", "bison", "flex", "git", "curl"
         )
         SudoFoldersToCreate = @("/usr/mod/scripts")
+        FilesToRemoveFromUserFolders = @("README.md","LICENSE",".gitignore",".gitkeep",".git")
     }
     
     return $config

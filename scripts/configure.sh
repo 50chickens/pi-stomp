@@ -40,7 +40,7 @@ function run_configure_host_bash_script()
 }
 run_configure_powershell_script_audio()
 {
-    sudo pwsh -File "./powershell/configure.ps1" -ShouldBeRoot $true -InstallAudio
+    sudo pwsh -File "./powershell/configure.ps1" -ShouldBeRoot -InstallAudio
     #fail on error
     if [ $? -ne 0 ]; then
         echo -e "${redText}Audio services configuration script failed\e[0m"
@@ -49,13 +49,57 @@ run_configure_powershell_script_audio()
 }
 run_configure_powershell_script_cockpit()
 {
-    sudo pwsh -File "./powershell/configure.ps1" -ShouldBeRoot $true -InstallCockpit
+    sudo pwsh -File "./powershell/configure.ps1" -ShouldBeRoot -InstallCockpit
     #fail on error
     if [ $? -ne 0 ]; then
         echo -e "${redText}Cockpit configuration script failed\e[0m"
         exit 1
     fi
 }
+run_configure_powershell_script_audioPackages()
+{
+    sudo pwsh -File "./powershell/configure.ps1" -ShouldBeRoot -InstallAudioPackages
+    #fail on error
+    if [ $? -ne 0 ]; then
+        echo -e "${redText}Audio packages installation script failed\e[0m"
+        exit 1
+    fi
+}
+run_configure_powershell_script_createPythonVirtualEnvironment()
+{
+    pwsh -File "./powershell/configure.ps1" -CreatePythonVirtualEnvironment
+    #fail on error
+    if [ $? -ne 0 ]; then
+        echo -e "${redText}Python virtual environment setup script failed\e[0m"
+        exit 1
+    fi
+}
+invoke-configure-powershell_script_create_systemd_services()
+{
+    sudo pwsh -File "./powershell/configure.ps1" -ShouldBeRoot -CreateAudioServicesSystemd
+    if [ $? -ne 0 ]; then
+        echo -e "${redText}Audio services systemd configuration script failed\e[0m"
+        exit 1
+    fi
+}
+invoke-configure-powershell_script_userdata_files()
+{
+    pwsh -File "./powershell/configure.ps1" -InstallUserDataFiles
+    if [ $? -ne 0 ]; then
+        echo -e "${redText}User data files installation script failed\e[0m"
+        exit 1
+    fi
+}
+invoke-configure-powershell_script_start_systemd_services()
+{
+    sudo pwsh -File "./powershell/configure.ps1" -ShouldBeRoot -StartAudioServices
+    if [ $? -ne 0 ]; then
+        echo -e "${redText}Starting audio services systemd services script failed\e[0m"
+        exit 1
+    fi
+}
+
+
 #set -e #exit on any error
 greenText="\e[32m"
 redText="\e[31m"
@@ -98,9 +142,19 @@ dot_source_os_release_file # get VERSION_CODENAME and run PowerShell scripts
 echo -e "----------------------------------------"
 run_configure_host_bash_script #run this script as sudo to do OS configuration tasks that need root.
 echo -e "----------------------------------------"
-run_configure_powershell_script_audio
+#run_configure_powershell_script_audio
 echo -e "----------------------------------------"
-run_configure_powershell_script_cockpit
+#run_configure_powershell_script_cockpit
+echo -e "----------------------------------------"
+#run_configure_powershell_script_audioPackages
+echo -e "----------------------------------------"
+#run_configure_powershell_script_createPythonVirtualEnvironment
+echo -e "----------------------------------------"
+invoke-configure-powershell_script_create_systemd_services
+echo -e "----------------------------------------"
+#invoke-configure-powershell_script_userdata_files
+echo -e "----------------------------------------"
+invoke-configure-powershell_script_start_systemd_services
 echo -e "----------------------------------------"
 
 # #invoke-configure-host_powershell_script

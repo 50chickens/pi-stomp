@@ -5,7 +5,11 @@ param(
         [switch]$InstallOptionalPackages,
         [switch]$InstallCockpit,
         [switch]$InstallMainPackages,
-        [switch]$InstallOtherPackages
+        [switch]$InstallOtherPackages,
+        [switch]$createPythonVirtualEnvironment,
+        [switch]$CreateAudioServicesSystemd,
+        [switch]$StartAudioServices,
+        [switch]$InstallUserDataFiles
 )
 $ErrorActionPreference = "Stop"
 
@@ -66,9 +70,60 @@ if ($InstallCockpit)
     Invoke-PackageInstall -packagestoBeInstalled $cockPitPackages
     Write-Host "----------------------------------------"
 }
-# Write-Host "----------------------------------------"
-# write-host "Installing cockpit packages..." 
-# Invoke-PackageInstall -packagestoBeInstalled $cockPitPackages
+if ($InstallAudioPackages)
+{
+    Write-Host "Creating audio configuration..."
+    Invoke-AudioUserAndGroupConfiguration -group $configuration.Group -user $configuration.User -jackUser $configuration.JackUser
+    Write-Host "----------------------------------------"
+    New-Folders -foldersToCreate $configuration.SudoFoldersToCreate
+    $audioPackages = $configuration.AudioPackages
+    write-host "Installing audio packages..."
+    Invoke-PackageInstall -packagestoBeInstalled $audioPackages
+    Write-Host "----------------------------------------"
+    
+}
+if ($createPythonVirtualEnvironment)
+{
+    write-host "getting python version..."
+    $pythonVersion = Get-PythonVersion #for python version we only need the major.minor part, eg 3.11. use regex to get named group for major.minor
+    Write-Host "----------------------------------------"
+    Write-Host "Setting up python virtual environment..."
+    Invoke-InstallPythonPackages -pythonPackageInstallationScript $configuration.PythonPackageInstallationScript
+    Write-Host "----------------------------------------"
+    Write-Host "patching python files for compatibility..."
+    Invoke-PatchPythonFiles -pythonVersion $pythonVersion -venvPath "$($HOME)/.env"
+    Write-Host "----------------------------------------"
+}
+if ($ConfigureAudioServicesSystemd)
+{
+    Write-Host "Applying authbind configuration..."
+    Invoke-AuthBindConfiguration -user $configuration.User -jackFolder $configuration.JackFolder
+    New-SystemDServices -servicesUnitFileFolder $configuration.AudioServicesUnitFileFolder
+   
+}
+    
+if ($InstallUserDataFiles)
+{
+    write-host "Creating user data files and folders..."
+    Remove-UserdataFolders
+    New-LinkedFolders
+    write-host "creating data folders..."
+    New-Folders -foldersToCreate $configuration.FoldersToCreate
+    Write-Host "Checking out required repos..."
+    Invoke-CheckoutGitRepos -repos $configuration.Repos
+    Write-Host "cleaning up pedalboards directory..."
+    Remove-UnrelatedFilesFromUserDataFolder -directory $configuration.PedalboardsDirectory
+    Write-Host "cleaning up user files directory..."
+    Remove-UnrelatedFilesFromUserDataFolder -directory $configuration.UserFilesDirectory -filesToRemoveFromUserFolders $configuration.FilesToRemoveFromUserFolders
+
+    Write-Host "----------------------------------------"
+}
+if ($StartAudioServices)
+{
+    Write-Host "Starting audio services..."
+    Start-SystemDServices -services $configuration.AudioServicesToInstall
+    Write-Host "----------------------------------------"
+}
 # Write-Host "----------------------------------------"
 # write-host "Installing main packages..." 
 # Invoke-PackageInstall -packagestoBeInstalled $mainPackages
