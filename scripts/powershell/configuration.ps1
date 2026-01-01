@@ -29,8 +29,8 @@ function New-PiStompConfiguration {
         SetupFolder = "../../setup"
         AudioServicesUnitFileFolder = "../../setup/AudioServices"
         MidiServicesUnitFileFolder = "../../setup/MidiServices"
-        AudioServicesToInstall = @("browsepy", "jack", "mod-host", "mod-ui")
-        MidiServicesToStart = @("mod-amidithru", "mod-touchosc2midi", "mod-midi-merger", "mod-midi-merger-broadcaster")
+        AudioServices = @("browsepy", "jack", "mod-host", "mod-ui")
+        MidiServices = @("mod-amidithru", "mod-touchosc2midi", "mod-midi-merger", "mod-midi-merger-broadcaster")
         
         # From configure-pistomp.ps1
         BaseGithubOrganization = "TreeFallSound"

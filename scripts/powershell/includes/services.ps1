@@ -52,18 +52,17 @@ function Disable-Services($servicesToDisable)
         $service = $services |? { $_.Name -imatch $serviceToProcess}
         if (-not $service) 
         {
-            # Service not found in system-wide services, try user services for pistomp
-            Write-Host "Service $serviceToProcess not found in system services, checking user services..."
-            $userServiceList = su pistomp -c "systemctl --user list-unit-files" 2>$null | grep "$serviceToProcess"
-            if ($userServiceList -and $userServiceList -match "$serviceToProcess") 
-            {
-                Write-Host "Found user service: $serviceToProcess for user pistomp. Disabling..."
-                su pistomp -c "systemctl --user stop $serviceToProcess 2>/dev/null; systemctl --user disable $serviceToProcess 2>/dev/null" 
-                Write-Host "User service $serviceToProcess stopped and disabled." -ForegroundColor Green
-            }
-            else 
-            {
-                write-host "Service $serviceToProcess not found on system, skipping." -ForegroundColor Yellow
+            #check for the service first.
+            Write-host "Service $serviceToProcess not found, checking for orphaned service files." -ForegroundColor Yellow
+            $serviceFilePaths = @("/usr/lib/systemd/system/$serviceToProcess.service", "/etc/systemd/system/multi-user.target.wants/$serviceToProcess.service")
+            
+            $serviceFilePaths |% {
+                $serviceFilePath = $_
+                if (Test-Path -Path $serviceFilePath) 
+                {
+                    Write-Host "Removing service file: $serviceFilePath" -ForegroundColor Yellow
+                    Remove-Item -Path $serviceFilePath -Force
+                }
             }
             return
         }

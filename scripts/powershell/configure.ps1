@@ -96,6 +96,8 @@ if ($createPythonVirtualEnvironment)
 }
 if ($ConfigureAudioServicesSystemd)
 {
+    write-host "Stopping/removing audio services first."
+    Disable-Services -servicesToDisable $configuration.AudioServices
     Write-Host "Applying authbind configuration..."
     Invoke-AuthBindConfiguration -user $configuration.User -jackFolder $configuration.JackFolder
     New-SystemDServices -servicesUnitFileFolder $configuration.AudioServicesUnitFileFolder
@@ -121,7 +123,7 @@ if ($InstallUserDataFiles)
 if ($StartAudioServices)
 {
     Write-Host "Starting audio services..."
-    Start-SystemDServices -services $configuration.AudioServicesToInstall
+    Start-SystemDServices -services $configuration.AudioServices
     Write-Host "----------------------------------------"
 }
 # Write-Host "----------------------------------------"

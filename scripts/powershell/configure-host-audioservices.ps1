@@ -8,8 +8,8 @@ $setupfolder = "../../setup"
 $alsaStateFilePath = "$setupfolder/audio/$($alsaStateFile).state"
 $audioServicesUnitFileFolder = "$setupfolder/AudioServices"
 $midiServicesUnitFileFolder = "$setupfolder/MidiServices"
-$audioServicesToInstall = @("browsepy","jack","mod-host","mod-ui")
-$midiServicesToStart = @("mod-amidithru","mod-touchosc2midi","mod-midi-merger","mod-midi-merger-broadcaster")
+# $audioServices = @("browsepy","jack","mod-host","mod-ui")
+# $midiServices = @("mod-amidithru","mod-touchosc2midi","mod-midi-merger","mod-midi-merger-broadcaster")
 
 #get the folder where the powershell script is not the bash script. 
 $expectedDirectory = $MyInvocation.MyCommand.Definition | Split-Path -Parent
@@ -57,7 +57,7 @@ write-host "Creating audio systemd services..."
 New-SystemDServices -ServicesUnitFileFolder $audioServicesUnitFileFolder
 Write-Host "----------------------------------------"
 Write-Host "Enabling and starting audio systemd services..."
-Start-SystemDServices -Services $audioServicesToInstall
+Start-SystemDServices -Services $AudioServices
 Write-Host "----------------------------------------"
 if ($enableMidi)
 {
@@ -68,7 +68,7 @@ if ($enableMidi)
     New-AudioSystemDServices -servicesUnitFileFolder $midiServicesUnitFileFolder
     Write-Host "----------------------------------------"
     Write-Host "Enabling and starting MIDI systemd services..."
-    Start-SystemDServices -Services $midiServicesToStart
+    Start-SystemDServices -Services $MidiServices
     Write-Host "----------------------------------------"
 }
 write-host "Audio services configuration complete"
