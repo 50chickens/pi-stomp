@@ -26,7 +26,7 @@ function git_clone_or_pull_repos()
     echo "Checking out or pulling latest code from git repos..."
     #noop for now, assume repos are already cloned.
 }
-function run_configure_host_sudo_script() 
+function run_configure_host_bash_script() 
 {
 #run configure-host.sh with sudo (not sudo -E) to do OS configuration tasks that need root.
     HOST_CONFIG_SCRIPT="./bash/configure-host.sh"
@@ -77,7 +77,8 @@ git_clone_or_pull_repos
 echo -e "----------------------------------------"
 dot_source_os_release_file # get VERSION_CODENAME and run PowerShell scripts
 echo -e "----------------------------------------"
-run_configure_host_sudo_script #run this script as sudo to do OS configuration tasks that need root.
+run_configure_host_bash_script #run this script as sudo to do OS configuration tasks that need root.
+exit
 echo -e "----------------------------------------"
 #invoke-configure-host_powershell_script
 echo -e "----------------------------------------"
