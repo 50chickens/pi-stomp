@@ -71,7 +71,7 @@ state.sndrpihifiberry {
 	control.6 {
 		iface MIXER
 		name 'DSP Program'
-		value 'FIR interpolation with de-emphasis'
+		value 'Low latency IIR with de-emphasis'
 		comment {
 			access 'read write'
 			type ENUMERATED

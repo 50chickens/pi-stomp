@@ -168,7 +168,7 @@ function install_dotnet() {
     chmod 755 dotnet-install.sh
     export DOTNET_INSTALL_DIR=/opt/microsoft/dotnet
     export DOTNET_ROOT=/opt/microsoft/dotnet
-    ./dotnet-install.sh --verbose --channel 9.0
+    ./dotnet-install.sh --verbose --channel 8.0
     dotnet_symlink_path="/usr/bin/dotnet"
     if [ -L $dotnet_symlink_path ]; then
         echo -e "${blueText}Removing existing $dotnet_symlink_path symlink and replacing it.\e[0m"
